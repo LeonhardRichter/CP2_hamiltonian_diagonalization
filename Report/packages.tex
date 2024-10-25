@@ -1,0 +1,77 @@
+\usepackage{microtype}
+\usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
+% \usepackage{scrhack}
+
+\makeatletter
+\DeclareSizeFunction{sub}{\sub@sfcnt\@font@info}
+\makeatother
+\usepackage{stix2}
+
+\usepackage[
+    backend=biber,
+    style=phys,
+    biblabel=brackets
+]{biblatex}
+
+\usepackage{xcolor}
+\definecolor{cblue}{rgb}{0.16, 0.32, 0.75}
+\definecolor{cred}{rgb}{0.7, 0.11, 0.11}
+
+\usepackage[
+	%— colors 
+    colorlinks=true, 
+    breaklinks=false, 
+    %	    citecolor=blue, 
+    linkcolor=blue, 
+    %	    urlcolor=blue,
+    draft=false,
+    %— pdf-bookmarks
+    bookmarksopen=false, 
+    bookmarksopenlevel=0,
+    bookmarksnumbered=true,
+]{hyperref}
+    
+\hypersetup{%
+    ,linkcolor=cred
+    ,citecolor=cblue
+    ,urlcolor=black
+}
+
+%%%%%%% MATH packages, symbols and settings %%%%%%
+\usepackage{
+    amsmath,
+    amssymb, % redundant if loading stix2 package
+    amsfonts,
+    amsthm,
+    mathtools,
+}
+
+\usepackage{
+    % bbold,
+    % dsfont,
+    nicefrac,
+    % derivative, % for derivatives. alternative: diffcoeff
+    % tensor,
+    colonequals
+}
+
+%%%%% MISC packages %%%%%%
+\usepackage{etoolbox}   
+\usepackage{ifthen}
+\usepackage{ifdraft}
+\usepackage{cleveref} % smart references with \cref
+\usepackage{csquotes}
+\usepackage{nameref}
+
+\usepackage[
+	obeyDraft, 
+	textwidth = 0.8in,
+ 	textsize = footnotesize
+]{todonotes}
+
+
+%%%%%%% Graphics %%%%%%%%
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}

@@ -1,2 +1,2 @@
 # CP2_hamiltonian_diagonalization
-Repository for implementations of algorithms for diagonalizing self-adjoint matrices as part of the course CP2: Advanced projects in computational physics at FAU.
+Repository for implementations of algorithms for diagonalizing hermitian matrices as part of the course CP2: Advanced projects in computational physics at FAU in the winter term of 2024/2025.

@@ -1,0 +1,48 @@
+\documentclass[
+    11pt,
+    a4paper,
+    onepage, 
+    DIV=11,
+    draft, 
+]{scrartcl}
+
+\input{packages.tex}
+\input{commands.tex}
+
+\KOMAoptions{
+    listof=entryprefix,
+    bibliography=totoc,
+    toc=index,
+%	parskip=half*,
+	headsepline=false,
+	footsepline=false,
+	chapterprefix=false,
+	headings=normal,
+	headings=optiontoheadandtoc,text
+	captions=tableheading,
+}
+
+% show only one of isbn, issn, doi
+\AtEveryBibitem{%
+  \iffieldundef{doi}
+    {\iffieldundef{issn}
+       {}
+       {\clearfield{isbn}}}
+    {\clearfield{issn}%
+     \clearfield{isbn}}%
+}
+
+\addbibresource{references.bib}
+
+
+\title{Report}
+\subject{Diagonalizing Spin Hamiltonians with the Lanczos Algorithm}
+
+\author{Leonhard Richter}
+\date{}
+
+\begin{document}
+    \maketitle
+
+
+\end{document}
