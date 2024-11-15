@@ -56,6 +56,11 @@ def csr_random_self_adjoint(n: int, d: float = 0.01) -> csr:
 def lanczos_tridiag(
     A: csr, v: np.ndarray, max_dim: int, epsilon: float
 ) -> ArrayLike:
+    """
+    Funciton of the lanczos method for tridiagonalizing a self-adjoit matrix.
+    The implementation follows
+        Koch, Erik (2015) ‘The Lanczos Method’, in Pavarini, Eva et al. (eds) Many-body physics: from Kondo to Hubbard: lecture notes of the Autumn School on Correlated Electrons 2015: at Forschungszentrum Jülich, 21-25 September 2015. Jülich: Forschungszentrum Jülich (Schriften des Forschungszentrums Jülich. Reihe Modeling and Simulation, Band 5). Available at: https://www.cond-mat.de/events/correl15/manuscripts/koch.pdf.
+    """
     n, m = A.shape
     assert n == m, "matrix is not quadratic"
     assert is_self_adjoint(A), "matrix is not self-adjoint"
