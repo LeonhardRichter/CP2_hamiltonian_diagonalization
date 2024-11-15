@@ -1,0 +1,105 @@
+
+% get access to document class options
+\makeatletter \usepackage[\@classoptionslist]{optional}
+
+%define a notfinal toggle
+\newtoggle{notfinal}	% create a new toggle value from etoolbox
+\toggletrue{notfinal}	% default setting is true
+\opt{final}{\togglefalse{notfinal}} % if classmode is final, set to false
+
+%define a command for highlighting tentative content. 
+%-- Only displayed in draft or normal mode. 
+%--Hidden in final mode
+\newcommand\texttodo[1]{%
+   \iftoggle{notfinal}{%
+      {\color{red}#1}%
+   }{%
+      #1%
+   }%
+}
+\newcommand\carefull\texttodo
+
+
+
+% ---------- MATH ----------
+
+\newcommand{\iu}{\mathrm{i}\mkern1mu}
+\renewcommand{\Re}{\mathfrak{Re}}
+\renewcommand{\Im}{\mathfrak{Im}}
+
+\newcommand{\id}{\mathrm{id}}
+\newcommand{\primed}{^\prime}
+\newcommand{\primedd}{^{\prime\prime}}
+\newcommand{\dual}{^\prime}
+
+\newcommand{\dd}[1]{\mathop{\mathrm{d}#1}}
+
+\DeclareMathOperator{\one}{\mathds{1}}
+\newcommand{\adj}{^\ast}
+\newcommand{\inv}{^{-1}}
+\newcommand\close\overline
+
+\newcommand{\HH}{\mathcal{H}}
+\newcommand{\N}{\mathds{N}} %natural numbers
+\newcommand{\Z}{\mathds{Z}} %integers
+\newcommand{\Q}{\mathds{Q}} %rationals
+\newcommand{\R}{\mathds{R}} %reals
+\newcommand{\C}{\mathds{C}} %complex numbers
+
+
+\DeclareMathOperator{\vecspan}{span}
+
+
+
+% ---------- Bracktes ----------
+
+
+% Klammern - mit Variablen Größen
+% #1 gives the variable or a dot if the arguement is left empty. Requeire etoolbox
+\DeclarePairedDelimiter{\of}{(}{)}
+\DeclarePairedDelimiter{\cof}{\{}{\}}
+\DeclarePairedDelimiter{\eof}{[}{]}
+\DeclarePairedDelimiterX\comm[2]{[}{]}{#1, #2}
+\newcommand\commutator\comm
+\DeclarePairedDelimiterX\innerp[2]{\langle}{\rangle}{#1,\; #2}
+\DeclarePairedDelimiterX\braket[2]{\langle}{\rangle}{#1\,\delimsize\vert\, #2}
+\DeclarePairedDelimiterX\ket[1]{\lvert}{\rangle}{#1}
+
+%\usepackage{etoolbox}
+\newcommand{\emptyplaceholder}{\phantom{A}} % alternatively \;\cdot\;
+\DeclarePairedDelimiterX\norm[1]\lVert\rVert{
+    \ifblank{#1}{\emptyplaceholder}{#1}
+}
+
+\DeclarePairedDelimiterXPP\pnorm[1]{}\lVert\rVert{_{p}}{
+    \ifblank{#1}{\emptyplaceholder}{#1}
+}
+
+\DeclarePairedDelimiterXPP\twonorm[1]{}\lVert\rVert{_{2}}{
+    \ifblank{#1}{\emptyplaceholder}{#1}
+}
+
+\DeclarePairedDelimiterXPP\opnorm[1]{}\lVert\rVert{_{\mathrm{op}}}{
+    \ifblank{#1}{\emptyplaceholder}{#1}
+}
+
+
+\DeclarePairedDelimiterX\abs[1]\lvert\rvert{#1}
+
+\providecommand\given{}
+\DeclarePairedDelimiterXPP\Prob[1]{\mathcal{P}}(){}{
+   \renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}}
+   #1}
+
+% just to make sure it exists
+\providecommand\given{}
+% can be useful to refer to this outside \Set
+\newcommand\SetSymbol[1][]{%
+   \nonscript\:#1\vert
+   \allowbreak
+   \nonscript\:
+   \mathopen{}}
+\DeclarePairedDelimiterX\Set[1]\{\}{%
+\renewcommand\given{\SetSymbol[\delimsize]}
+#1
+}
