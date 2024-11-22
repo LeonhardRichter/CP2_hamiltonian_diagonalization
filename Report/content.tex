@@ -63,13 +63,13 @@ With this definition the desired property of \((\innerp{v_i}{H v_j})_{0 \leq i,j
 \begin{lemma}
     Let \(H\in \C^{N\times N}\) for \(N\in\N\) be a hermitian matrix, \(v_0 = v / \norm{v}\), and \(K \leq N-1\).
     Define \(v_n\) recursively for \(1 \leq n \leq K\) by
-    \begin{equation}
-        b_{n+1}v_{n+1} = \tilde v_{n+1} = H v_n - \sum_{i=0}^n \innerp{v_i}{H v_i} v_i
+    \begin{equation}\label{eq:lanczos-basis-def}
+        b_{n+1}v_{n+1} = \tilde v_{n+1} = H v_n - \sum_{i=0}^n \innerp{v_i}{H v_n} v_i
         ,
     \end{equation}
     with \(b_n = \norm{\tilde v_n}\).
     Then
-    \begin{equation}
+    \begin{equation}\label{eq:lanczos-basis}
         b_{n+1} v_{n+1} = H v_n - a_n v_n - b_n v_{n-1}
     \end{equation}
     for \(n\leq K\) with \(a_n = \innerp{v_n}{H v_n}\),
@@ -87,7 +87,18 @@ With this definition the desired property of \((\innerp{v_i}{H v_j})_{0 \leq i,j
     \end{equation}
     is tri-diagonal.
 \end{lemma}
-
+\begin{proof}
+    We proof \cref{eq:lanczos-basis}, orthogonality \(\innerp{v_i}{v_j} = \delta_{i,j}, \forall i,j \leq n\), and \(\innerp{v_i}{H v_j} = \delta_{j, i-1} b_i + \delta_{i,j} a_i, \forall i,j \leq n\) by induction in \(n\).
+    Consider the case \(n=1\).
+    Then 
+    \begin{align}
+        \innerp{v_0}{v_1} = \frac{1}{b_1} \of*{ \innerp{v_0}{H v_0} - \innerp{v_0}{H v_0} \innerp{v_0}{v_0} } = 0
+        \\
+        \innerp{v_i}{v_i} = \norm{v_i} = \norm{\frac{\tilde v_i}{b_i}} = \frac{1}{\norm{\tilde v_i}}\norm{\tilde v_i} = 1, \quad i = 1,0
+        \\
+        \innerp{v_0}{H v_1} = \innerp{H_v 0}{v_1} = 
+    \end{align}
+\end{proof}
 
 
 % \section{Introduction}
