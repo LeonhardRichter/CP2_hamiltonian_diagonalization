@@ -26,6 +26,68 @@ The time evolution for a duration \(t\in\R\) of a quantum system modeled by a ti
 \footnotetext{Here, and in the following we work in \carefull{natural units} where \(\hbar = 1\).}
 
 
+The Lanczos method is a numerical method to approximate spectral properties of hermitian matrices. 
+Given such a matrix \(H \in \C^{N\times N}\), the method provides iteratively a \(d\)-dimensional approximation of \(H\) that is tri-diagonal after \(d-1\) iterations and which can easily be diagonalized in \(\mathcal{O}(N)\) time.
+The only necessary information specific to \(H\) is an oracle for the matrix-vector product \(H\cdot v\).
+If the matrix is sparse, i.e. if the ratio of the number of non-zero and zero entries is constant in \(N\) and small, the matrix-vector product can be evaluated in \(\mathcal{O}(N)\) time and storing such matrices takes \(\mathcal{O}(N)\) memory. 
+Due to fast convergence of the method with respect to a growing number of iterations, approximating the lowest eigenvalue takes \(\mathcal{O}(1)\) iterations and therefore \(\mathcal{O}(N)\) memory and time \cite{kocherikLanczosMethod2015}.
+In addition, eigenvectors and matrix-exponential may also be approximated using this method. 
+
+The idea of the Lanczos algorithm is to find an orthonormal basis \(\Set{v_i}_{0\leq i \leq K}\) for the \emph{Krylov space}
+\begin{equation}
+    \mathcal{K}^{(K)}_H(v) = \vecspan\of*{\Set{v, Hv, H^2v, H^3v, \dots, H^K v}}
+\end{equation}
+of order \(K \leq N-1\) such that \((\innerp{v_i}{H v_j})_{0 \leq i,j \leq K}\) is a tri-diagonal matrix. 
+Then when extending this basis to a basis \((\tilde v_i)_{0\leq i \leq N}\) of \(C^N\), the non-trivial part of the projection 
+\begin{equation}
+    P_{K+1} H P_{K+1} = H_{\mathcal{K}^{(K)}_H(v)} \oplus 0_{(\mathcal{K}^{(K)}_H(v))^\perp}, \quad P_n v \coloneq \sum_{i=1}^n \innerp{v_i}{v} v_i
+\end{equation}
+onto the first \(K+1\) basis elements of \((\tilde{v}_i)_{0\leq i \leq N}\) is tri-diagonal. 
+This projection is known as the \emph{Galerkin approximation} of \(H\) and converges to \(H\) when \(K \to N-1\).
+
+The algorithm computes this orthonormal basis for \(\mathcal{K}^{(K)}_H(v)\) is computed very similar to \emph{Gram-Schmidt orthogonalization} but of an iteratively defined set of vectors. 
+Set \(v_0 = v / \norm{v}\), for some arbitrary vector \(v\in\C^N\). 
+The next vector \(v_1\) is the normalized Gram-Schmidt orthogonalization of \(H v_0\) with respect to \(v_0\):
+\begin{equation}
+    b_1 v_1 = \tilde v_1 = H v_0 - \innerp{v_0}{H v_0} v_0
+    ,
+\end{equation}
+where we introduced the notation \(b_n = \norm{\tilde v_n}\).
+In general, \(v_{n+1}\) is defined as 
+\begin{equation}
+    b_{n+1} v_{n+1} = \tilde v_{n+1} = H v_n - \sum_{i=0}^n \innerp{v_i}{H v_i} v_i
+    .
+\end{equation}
+With this definition the desired property of \((\innerp{v_i}{H v_j})_{0 \leq i,j \leq K}\) follows due to \(H\) being hermitian.
+
+\begin{lemma}
+    Let \(H\in \C^{N\times N}\) for \(N\in\N\) be a hermitian matrix, \(v_0 = v / \norm{v}\), and \(K \leq N-1\).
+    Define \(v_n\) recursively for \(1 \leq n \leq K\) by
+    \begin{equation}
+        b_{n+1}v_{n+1} = \tilde v_{n+1} = H v_n - \sum_{i=0}^n \innerp{v_i}{H v_i} v_i
+        ,
+    \end{equation}
+    with \(b_n = \norm{\tilde v_n}\).
+    Then
+    \begin{equation}
+        b_{n+1} v_{n+1} = H v_n - a_n v_n - b_n v_{n-1}
+    \end{equation}
+    for \(n\leq K\) with \(a_n = \innerp{v_n}{H v_n}\),
+    the set \((v_n)_{0\leq n \leq K}\) is a orthonormal basis for \(\mathcal{K}^{(K)}_H(v)\), and its matrix representation
+    \begin{equation}
+        (\innerp{v_i}{H v_j})_{0 \leq i,j \leq K} = 
+        \begin{pmatrix}
+            a_0 & b_1 &        &        &         &    \\
+            b_1 & a_1 & b_2    &        &   0     &    \\
+                & b_2 & a_3    & \ddots &         &    \\
+                &     & \ddots & \ddots & \ddots  &    \\
+                & 0   &        & \ddots & a_{K-1} & b_K\\
+                &     &        &        & b_K     & a_{K}
+        \end{pmatrix}
+    \end{equation}
+    is tri-diagonal.
+\end{lemma}
+
 
 
 % \section{Introduction}
@@ -39,6 +101,5 @@ The time evolution for a duration \(t\in\R\) of a quantum system modeled by a ti
 % \section{Results}
 % \subsection{Time-evolution of the photon number}
 % \subsection{}
-
 
 
