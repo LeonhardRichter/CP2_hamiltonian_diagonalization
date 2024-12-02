@@ -13,29 +13,22 @@ norm = linalg.norm
 # we will use sparse.csr, sparse.random_array, np.random.default_rng
 
 
-def sparse_adjoint(A: csr):
+def adjoint(A: csr | ArrayLike):
     return A.transpose().conj()
-
-
-# def is_self_adjoint(A: csr):
-#     n, m = A.shape
-#     assert n == m, "matrix is not quadratic"
-#     # check only the non-zero entries
-#     # if they are unequal, a True will be written to the sparse result array
-#     # hence, if not self adjoint, the number of datapoints (nnz) is greater than 0
-#     return (sparse_adjoint(A) != A).nnz == 0
 
 
 def is_self_adjoint(A: csr | ArrayLike) -> bool:
     n, m = A.shape
-    assert n == m, "matrix is not quadratic"
+    if n != m:
+        print("Matrix is not quadratic")
+        return False
     if type(A) is csr:
         # check only the non-zero entries
         # if they are unequal, a True will be written to the sparse result array
         # hence, if not self adjoint, the number of datapoints (nnz) is greater than 0
-        return (sparse_adjoint(A) != A).nnz == 0
+        return (adjoint(A) != A).nnz == 0
     if type(A) is ArrayLike:
-        return np.all(sparse_adjoint(A) == A)
+        return np.all(adjoint(A) == A)
 
 
 def csr_random_self_adjoint(n: int, d: float = 0.01) -> csr:
@@ -43,7 +36,7 @@ def csr_random_self_adjoint(n: int, d: float = 0.01) -> csr:
         (n, n),
         density=d,
         format="csr",
-        dtype=np.complex64,
+        dtype=np.complex128,
         random_state=np.random.default_rng(),
     )
     A = csr(1 / 2 * (sparse_adjoint(A) + A))
@@ -53,9 +46,9 @@ def csr_random_self_adjoint(n: int, d: float = 0.01) -> csr:
     return A
 
 
-def lanczos_tridiag(
-    A: csr, v: np.ndarray, max_dim: int, epsilon: float = 0.001
-) -> csr:
+def lanczos(
+    A: csr, v: np.ndarray, dim: int, epsilon: float = 0.001
+) -> np.ndarray:
     """
     Funciton of the lanczos method for tridiagonalizing a self-adjoit matrix.
     The implementation follows
@@ -66,22 +59,25 @@ def lanczos_tridiag(
     assert is_self_adjoint(A), "matrix is not self-adjoint"
 
     # initialize two arrays a and b for storing the result
-    a = np.zeros(max_dim, dtype=np.float64)
-    b = np.zeros(max_dim - 1, dtype=np.float64)
+    a = np.zeros(dim, dtype=np.float64)
+    b = np.zeros(dim - 1, dtype=np.float64)
+    # initialize an array for storing the Lanczos basis as row vectors
+    T = np.zeros((n, dim), dtype=np.complex128)
 
     # initialize v and w
     v = v / norm(v)
     w = A @ v
-
+    T[0] = v
     # first iteration
     a[0] = np.real(v @ w)
     w = w - a[0] * v  # axpy(-a[0],v,w)
     b[0] = norm(w)
-    for i in range(1, max_dim):
+    for i in range(1, dim):
         if abs(b[i - 1]) < epsilon:
             print(f"invariant subspace encountered at i = {i}")
             return
         w = w / b[i - 1]  # w = v_i = \tilde{v_i}/b_i
+        T[i] = w
         v = -b[i - 1] * v  # v = -b_i v_{i-1}
         v, w = w, v  # v = v_i, w = -b_i v_{i-1}
         # at first, we leave -a_i v_i out, to compute a_i easily without matrix vector product in the next step
@@ -90,17 +86,23 @@ def lanczos_tridiag(
             v @ w
         )  # a_i = <v_i,w> = <v_i, Hv_i> - b_i <v_i, v_{i-1}>
         w = w - a[i] * v  # w = H v_i - b_i v_{i-1} - a_i v_i = \tilde{v_{i+1}}
-        if i + 1 < max_dim:
-            b[i] = norm(w)  # b_{i+1} = ||\tilde{v_{i+1}}||
-    # return np.diag(a) + np.diag(b[1::], 1) + np.diag(b[1::], -1)
-    indices = np.arange(max_dim)
-    diag_indices = (indices, indices)
-    diag = csr((a, diag_indices), shape=(max_dim, max_dim))
-    upper_diag_indices = (indices[0:-1], indices[0:-1] + 1)
-    upper_diag = csr((b, upper_diag_indices), shape=(max_dim, max_dim))
-    lower_diag_indices = (indices[0:-1] + 1, indices[0:-1])
-    lower_diag = csr((b, lower_diag_indices), shape=(max_dim, max_dim))
-    return diag + lower_diag + upper_diag
+        b_new = norm(w)
+        if i + 1 < dim:
+            b[i] = b_new  # b_{i+1} = ||\tilde{v_{i+1}}||
+    T[-1] = w / b_new
+
+    # return matrix (dense) in the Lanczos basis, and the matrix (dense) of Lanczos basis vectors as rows
+    return np.diag(a) + np.diag(b[1::], 1) + np.diag(b[1::], -1), T
+
+    # # build the matrix in this basis (again in csr)
+    # indices = np.arange(max_dim)
+    # diag_indices = (indices, indices)
+    # diag = csr((a, diag_indices), shape=(max_dim, max_dim))
+    # upper_diag_indices = (indices[0:-1], indices[0:-1] + 1)
+    # upper_diag = csr((b, upper_diag_indices), shape=(max_dim, max_dim))
+    # lower_diag_indices = (indices[0:-1] + 1, indices[0:-1])
+    # lower_diag = csr((b, lower_diag_indices), shape=(max_dim, max_dim))
+    # return diag + lower_diag + upper_diag
 
 
 def tridiag_to_diag(A: ArrayLike | csr, copy: bool = True):
@@ -137,3 +139,65 @@ def tridiag_to_diag(A: ArrayLike | csr, copy: bool = True):
     if A[[n - 1], [n - 1]] != 0:
         A[[n], [n - 1]] = 0
     return A
+
+
+def lanczos_evo(
+    H,
+    v,
+    dim: int,
+    T: float,
+    dt: float = 0.01,
+    observables: list = list(),
+    lanczos_epsilon: float = 0.001,
+    save_histroy: bool = True,
+):
+    """
+    Compute the evolution of a given initial state under a given Hamiltonian for some time approximated on the Krylow space of given dimension.
+    This is done by approximating the Hamiltonian on the Krylow space in tri-diagonal form and evaluating the matrix exponential with scipy expm for some short time.
+    The result is applied to the initial state to obtain the initial state for the next iteration.
+    For the next iteration, the Hamiltonian is again approximated using Lanczos alogithm, but now with respect to the evolved state.
+    Return either a list of expectation values at given times, or a list of vectors and bases at given times.
+    """
+
+    n, m = H.shape
+    assert n == m, "matrix is not quadratic"
+    assert is_self_adjoint(H), "matrix is not self-adjoint"
+    assert len(v) == n
+
+    tt = [
+        0,
+    ]
+    vt = [
+        v,
+    ]
+    t = dt
+
+    def update(v, t):
+        if save_histroy:
+            vt.append(v)
+            tt.append(t)
+        if not save_histroy:
+            vt = [
+                v,
+            ]
+            tt = [
+                t,
+            ]
+
+    def step(dt, v):
+        H_approx, basis = lanczos(A=H, v=v, dim=dim, epsilon=lanczos_epsilon)
+        U_approx = linalg.expm(-1j * dt * H_approx)
+        v_approx = U_approx @ vt[-1]  # in krylov basis
+        # multiply each basis vector with the parameter of the approximated vector and sum over all rows
+        v_new = np.sum(v_approx * basis, axis=0)  # in full basis
+        return v_new
+
+    while t < T:
+        v_new = step(dt, vt[-1])
+        t += dt
+        update(v_new, t)
+    t_rest = T - t
+    v_final = step(t_rest, vt[-1])
+    t += t + t_rest
+    update(v, t)
+    return tt, vt
