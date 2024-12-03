@@ -1,10 +1,15 @@
 % Contains an abstract (half a page), a short description of the background of the field and on the simulation method, a detailed description what is planned in the project, a timetable until when the code is expected to be completed and when results are expected
 
 \begin{abstract}
-    This report demonstrates the application of an efficient method for approximately diagonalizing sparse hermitian matrices---the \emph{Lanczos method}.
-    An espacially suitable usecase for this method is the application to spin Hamiltonians with only local interactions. 
-    Here, an \carefull{Ising model coupled to a monochromatic cavity field--- the Dicke-Ising model--- is being considered and the time evolution of the expected number of photons in the cavity} gets approximated using the Lanczos method.
-    This method itself is being discussed in detail and is implemented in the programming language \carefull{\texttt{julia}}.
+    This report demonstrates the application of the \emph{Lanczos algorithm} for approximating a hermitian matrix by a lower-dimensional tri-diagonal one.
+    Given a tri-diagonal approximation on a low-dimensional subspace, standard methods for fully diagonalizing or computing matrix functions such as the exponential become feasible and usually give approximations for the corresponding objects of the original matrix.
+    This method is especially efficient when applied to sparse matrices as typically arise in spin Hamiltonians.  
+    Here, we consider a system of many non-interacting two-level systems that couple equally to a harmonic oscillator---the Dicke model.
+    The Dicke model features a so-called \emph{superradiant phase}, where there are states that spontaneously emit more photons than expected.
+    This phenomenon is typically described by a transition amplitude of spontaneous emission scaling up to quadratically with the number of two-level systems.
+    Here, we apply Lanczos algorithm in order to simulate dynamical properties of the Dicke model.
+    In particular, the expectation value for the number of photons depending on time is compared for different initial states and different coupling strengths.
+    Prior to its application to this problem, the algorithm itself is being discussed in detail and is implemented in the programming language \texttt{python}.
 \end{abstract}
 
 \section{Introduction}

@@ -1,1 +1,6 @@
 diagonalizing
+Dicke
+tri-diagonal
+Lanczos
+superradiant
+quadratically
