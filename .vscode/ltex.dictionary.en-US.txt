@@ -4,3 +4,4 @@ tri-diagonal
 Lanczos
 superradiant
 quadratically
+diagonalized
