@@ -19,6 +19,36 @@
 }
 \newcommand\carefull\texttodo
 
+% ---------- DICKE ---------
+
+\newcommand\creation{a^\dagger}
+\newcommand\ad\creation
+\newcommand\adag\creation
+\newcommand\annihilation{a}
+\newcommand\an\annihilation
+\newcommand\photonnumber{\hat{n}}
+\newcommand\nn\photonnumber
+
+\newcommand\spin[1]{S^{#1}}
+\newcommand\s{\spin}
+
+\newcommand\Splus{\spin+}
+\newcommand\Sminus{\spin-}
+\newcommand\Sp\Splus
+\newcommand\Sm\Sminus
+\newcommand\SX{S_x}
+\newcommand\Sx{\SX}
+\newcommand\sx\SX
+\newcommand\SY{S_y}
+\newcommand\Sy{\SY}
+\newcommand\sy\SY
+\newcommand\SZ{S_z}
+\newcommand\Sz{\SZ}
+\newcommand\sz\SZ
+
+\newcommand\pauli[1]{\sigma_{#1}}
+\newcommand\pauliI[2]{\pauli{#1}^{(#2)}}
+\newcommand\paulii\pauliI
 
 
 % ---------- MATH ----------
@@ -32,12 +62,13 @@
 \newcommand{\primedd}{^{\prime\prime}}
 \newcommand{\dual}{^\prime}
 
-\newcommand{\dd}[1]{\mathop{\mathrm{d}#1}}
-
 \DeclareMathOperator{\one}{\mathds{1}}
 \newcommand{\adj}{^\ast}
 \newcommand{\inv}{^{-1}}
 \newcommand\close\overline
+
+\newcommand\Ltwo[1]{L^2(#1)}
+
 
 \newcommand{\HH}{\mathcal{H}}
 \newcommand{\N}{\mathds{N}} %natural numbers
@@ -49,7 +80,10 @@
 
 \DeclareMathOperator{\vecspan}{span}
 
+\renewcommand{\Re}{\mathfrak{Re}}
+\renewcommand{\Im}{\mathfrak{Im}}
 
+\newcommand{\dd}{\odif} % needs package 'derivative' 
 
 % ---------- Bracktes ----------
 

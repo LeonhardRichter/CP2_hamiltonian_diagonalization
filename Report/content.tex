@@ -5,38 +5,23 @@
     Given a tri-diagonal approximation on a low-dimensional subspace, standard methods for fully diagonalizing or computing matrix functions such as the exponential become feasible and usually give approximations for the corresponding objects of the original matrix.
     This method is especially efficient when applied to sparse matrices as typically arise in spin Hamiltonians.  
     Here, we consider a system of many non-interacting two-level systems that couple equally to a harmonic oscillator---the Dicke model.
-    The Dicke model features a so-called \emph{superradiant phase}, where there are states that spontaneously emit more photons than expected.
+    The Dicke model features a so-called \emph{super-radiant phase}, where there are states that spontaneously emit more photons than expected.
     This phenomenon is typically described by a transition amplitude of spontaneous emission scaling up to quadratically with the number of two-level systems.
     Here, we apply Lanczos algorithm in order to simulate dynamical properties of the Dicke model.
     In particular, the expectation value for the number of photons depending on time is compared for different initial states and different coupling strengths.
     Prior to its application to this problem, the algorithm itself is being discussed in detail and is implemented in the programming language \texttt{python}.
 \end{abstract}
 
-\section{Introduction}
-
-\begin{itemize}
-    \item motivation and background for spin systems
-    \begin{itemize}
-        \item study of matter and light-matter interaction
-        \item look into QFTCM for justification of the Hubbard model
-    \end{itemize}
-    \item motivation and background for the Lanczos method
-    \begin{itemize}
-        \item 
-    \end{itemize}
-\end{itemize}
-
-
-The time evolution for a duration \(t\in\R\) of a quantum system modeled by a time-independent self-adjoint operator \(H\), the \emph{Hamiltonian}, acting on some Hilbert space \(\HH\) is given by the unitary operator\footnotemark \(U(t) = e^{-\iu t H}\).
-\footnotetext{Here, and in the following we work in \carefull{natural units} where \(\hbar = 1\).}
-
+\section{The Lanczos algorithm}
+% The time evolution for a duration \(t\in\R\) of a quantum system modeled by a time-independent self-adjoint operator \(H\), the \emph{Hamiltonian}, acting on some Hilbert space \(\HH\) is given by the unitary operator\footnotemark \(U(t) = e^{-\iu t H}\).
+% \footnotetext{Here, and in the following we work in \carefull{natural units} where \(\hbar = 1\).}
 
 The Lanczos method is a numerical method to approximate spectral properties of hermitian matrices. 
 Given such a matrix \(H \in \C^{N\times N}\), the method provides iteratively a \(d\)-dimensional approximation of \(H\) that is tri-diagonal after \(d-1\) iterations and which can easily be diagonalized in \(\mathcal{O}(N)\) time.
 The only necessary information specific to \(H\) is an oracle for the matrix-vector product \(H\cdot v\).
-If the matrix is sparse, i.e. if the ratio of the number of non-zero and zero entries is constant in \(N\) and small, the matrix-vector product can be evaluated in \(\mathcal{O}(N)\) time and storing such matrices takes \(\mathcal{O}(N)\) memory. 
+If the matrix is sparse, i.e. if the ratio of the number of non-zero and zero entries is constant in \(N\) and small, the matrix-vector product can be evaluated in \(\mathcal{O}(N)\) time and storing such matrices takes \(\mathcal{O}(N)\) memory \cite{kocherikLanczosMethod2015}. 
 Due to fast convergence of the method with respect to a growing number of iterations, approximating the lowest eigenvalue takes \(\mathcal{O}(1)\) iterations and therefore \(\mathcal{O}(N)\) memory and time \cite{kocherikLanczosMethod2015}.
-In addition, eigenvectors and matrix-exponential may also be approximated using this method. 
+In addition, eigenvectors and the matrix-exponential may also be approximated using this method. 
 
 The idea of the Lanczos algorithm is to find an orthonormal basis \(\Set{v_i}_{0\leq i \leq K}\) for the \emph{Krylov space}
 \begin{equation}
@@ -65,7 +50,7 @@ In general, \(v_{n+1}\) is defined as
 \end{equation}
 With this definition the desired property of \((\innerp{v_i}{H v_j})_{0 \leq i,j \leq K}\) follows due to \(H\) being hermitian.
 
-\begin{lemma}
+\begin{lemma}\label{thm:lanczos-ONB}
     Let \(H\in \C^{N\times N}\) for \(N\in\N\) be a hermitian matrix, \(v_0 = v / \norm{v}\), and \(K \leq N-1\).
     Define \(v_n\) recursively for \(1 \leq n \leq K\) by
     \begin{equation}\label{eq:lanczos-basis-def}
@@ -92,7 +77,61 @@ With this definition the desired property of \((\innerp{v_i}{H v_j})_{0 \leq i,j
     \end{equation}
     is tri-diagonal.
 \end{lemma}
-\begin{proof}
+
+The Lanczos algorithm consists of computing the basis \(\Set{v_n}\) according to \cref{eq:lanczos-basis} iteratively. 
+Per iteration one matrix-vector product needs to be computed, which is the computationally most expensive operation.
+
+\section{The Dicke Model}
+In this report we consider the application of Lanczos algorithm to the \emph{Dicke model}.
+It models the collective interaction of a collection of \(N\in\N\) identical two-level systems (e.g. spins) with a harmonic oscillator (e.g. a single mode of some bosonic field).
+It can be seen as a multi-particle generalization of the celebrated quantum Rabi-model \cite{rabiSpaceQuantizationGyrating1937} and was introduced by \textcite{dickeCoherenceSpontaneousRadiation1954} in order to describe the spontaneous emission by a collection of molecules modelled as two-level systems.
+In his work, \citeauthor{dickeCoherenceSpontaneousRadiation1954} found that for certain states his model predicts unusual high emission rates---an effect known as \emph{super-radiance}.
+This result was confirmed later by \textcite{heppSuperradiantPhaseTransition1973}, who proved the existence of a phase transition to a region where super-radiant states exist in the thermodynamic limit of \(N\to\infty\).
+
+The goal for this project is to investigate the super-radiance phenomenon numerically for large \(N\).
+The full Dicke Hamiltonian on \((\C^2)^{\otimes N} \otimes \Ltwo{\R}\) is given by
+\begin{equation}\label{eq:dicke-hamiltonian}
+    H_{\mathrm{D}} = \frac{\Omega}{2} \SZ \otimes \one + \omega \one \otimes \nn + \lambda \SX \otimes \of*{\an + \ad}
+    ,
+\end{equation}
+where \(\Omega\) is the energy gap of the two-level systems, \(\omega\) is the frequency of the bosonic mode.
+\carefull{In the following we will only consider the fully resonant case \(\Omega=\omega\).}
+The creation and annihilation operators, \(\ad\) and \(\an\) are defined as usual by acting on an orthonormal basis \(\phi_n\) of \(\Ltwo{\R}\) via \(\ad\phi_n = \sqrt{n+1} \phi_{n+1}\) and \(\an\phi_n = \sqrt{n}\phi_{n-1}\).
+The number operator with \(\nn \phi_n = n \phi_n\) is defined accordingly.
+The collective spin operators 
+\begin{gather}
+	\s{}_{a} = \sum_{i = 1}^n \pauliI{a}{i}, \quad \pauliI{a}{i} = \one^{\otimes i-1}\otimes \pauli{a}\otimes \one^{\otimes N-i}
+    ,
+\end{gather}
+with \(a \in \cof{x,y,z}\) act collectively with the corresponding single spin Pauli matrices \(\pauli{x},\pauli{y},\pauli{z}\) and satisfy the commutation relations of the angular-momentum-algebra:
+\begin{equation}\label{eq:angular-momentum-algebra}
+	\comm{\s{}_k}{\s{}_l} = i2\tensor{\epsilon}{_{k,l}^{m}}\s{}_m
+    .
+\end{equation}
+Thus they give a representation of \(\mathfrak{so}(3)\) and there is a basis \(\ket{j,m}\) of \((\C^2)^{\otimes N}\) with eigenvalues
+\begin{gather}
+	\label{eq:dicke-states-total-spin}
+	(\SX^2 + \SY^2 + \SZ^2)\ket{j,m} = j(j+1)\ket{j,m}
+	\\
+	\label{eq:dicke-states-magnetic-number}
+	\s{}_z\ket{j,m} = m\ket{j,m}
+	\\
+	\label{eq:dicke-states-orthonormal}
+	\braket{j,m}{j\primed,m\primed} = \delta_{j,j\primed}\delta_{m,m\primed}
+\end{gather}
+with \(j = 0,1,\dots, \nicefrac{N}{2}\) and \(m = -j,-j+1, \dots,j-1, j\).
+In this context, these states are commonly known as \emph{Dicke states}.
+The Hamiltonian \(H_D\) commutes with the total collective spin operator \(\SX^2 + \SY^2 + \SZ^2\) and thus its matrix elements offer a block diagonal structure with blocks for each value of \(j\).
+
+
+
+\section{Description of the project}
+
+\section{Roadmap}
+\appendix
+
+\section{Proofs skipped in the main text}
+\begin{proof}[Proof of \cref{thm:lanczos-ONB}]
     We proof \cref{eq:lanczos-basis}, orthogonality \(\innerp{v_i}{v_j} = \delta_{i,j}, \forall i,j \leq n\), and \(\innerp{v_i}{H v_j} = \delta_{j, i-1} b_i + \delta_{i,j} a_i, \forall i,j \leq n\) by induction in \(n\).
     Consider the case \(n=1\).
     Then 
@@ -104,18 +143,5 @@ With this definition the desired property of \((\innerp{v_i}{H v_j})_{0 \leq i,j
         \innerp{v_0}{H v_1} = \innerp{H_v 0}{v_1} = 
     \end{align}
 \end{proof}
-
-
-% \section{Introduction}
-
-% \section{Background and methods}
-
-% \subsection{The Dicke-Ising model for light matter-interaction}
-
-% \subsection{The Lanczos method}
-
-% \section{Results}
-% \subsection{Time-evolution of the photon number}
-% \subsection{}
 
 
