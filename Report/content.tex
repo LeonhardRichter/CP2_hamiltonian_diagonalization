@@ -117,18 +117,75 @@ Thus they give a representation of \(\mathfrak{so}(3)\) and there is a basis \(\
 	\s{}_z\ket{j,m} = m\ket{j,m}
 	\\
 	\label{eq:dicke-states-orthonormal}
-	\braket{j,m}{j\primed,m\primed} = \delta_{j,j\primed}\delta_{m,m\primed}
+	\innerp{j,m}{j\primed,m\primed} = \delta_{j,j\primed}\delta_{m,m\primed}
 \end{gather}
 with \(j = 0,1,\dots, \nicefrac{N}{2}\) and \(m = -j,-j+1, \dots,j-1, j\).
 In this context, these states are commonly known as \emph{Dicke states}.
 The Hamiltonian \(H_D\) commutes with the total collective spin operator \(\SX^2 + \SY^2 + \SZ^2\) and thus its matrix elements offer a block diagonal structure with blocks for each value of \(j\).
 
-
+For these states, the transition probability for spontaneous emission is \cite[Ch. 5]{larsonJaynesCummingsModelIts2021}
+\begin{equation}
+    \mathcal P(j,m) = \sum_{\psi} \abs*{\innerp[\big]{\psi}{\s-\otimes\ad \ket{j,m}\otimes  \phi_0}}^2
+    = (j+m)(j-m+1)
+    .
+\end{equation}
+For a state where all two-level systems are in the excited state, \(\ket{\nicefrac{N}{2}, \nicefrac{N}{2}} = \ket{1,\dots, 1}\), this is proportional to the number of two-level systems: \(\mathcal P(\nicefrac{N}{2}, \nicefrac{N}{2}) \propto N \), as might be expected by classical intuition.
+However, there is a so called superradiant state \(\ket{\nicefrac{N}{2}, 0}\), which exceeds this scaling: \(\mathcal P(\nicefrac{N}{2}, 0) \propto N^2 \) \cite{larsonJaynesCummingsModelIts2021}.
+This super linear scaling with the number of systems is called \emph{super radiance} \cite{dickeCoherenceSpontaneousRadiation1954}.
 
 \section{Description of the project}
+\label{ch:project-description}
+In this project the super radiance effect shall be demonstrated by numerical simulation of the dynamical behaviour of the expectation value \(\innerp{\psi(t)}{\one\otimes\nn \psi(t)}\) of the number of photons in the system will be analysed.
+For this purpose, the Lanczos algorithm is applied to the matrix 
+\begin{equation}
+    M_D = \of[\Bigg]{ \innerp[\big]{\ket{j,m}\otimes\phi_n}{H_D \ket{j\primed,m\primed}\otimes\phi_{n\primed}} }_{\substack{
+        0\leq j,j\primed \leq \nicefrac{N}{2}
+        \\
+        -j \leq m,m\primed \leq j
+        \\
+        0 \leq n, n\primed \leq n_{\mathrm{max}}
+    }}
+\end{equation}
+with respect to some initial state \(\psi_0\) in order to obtain an approximation \(\tilde M_D^{(K)}\), where \(n_{\mathrm{max}}\) is some cut-off for the number of photons.
+This matrix represents the operator \(H_D\) restricted to the space of up to \(n_{\mathrm{max}}\) photons: \((\C^2)^{\otimes N} \otimes \vecspan\Set{\phi_n \given n\leq n_{\mathrm{max}}}\).
+For reasonably small \(K\), the matrix exponential \(\exp\of{-\iu \delta \tilde M_D^{(K)}}\) can then be easily calculated for small times \(\delta\) by standard methods.
+Here, the plan is to use \texttt{scipy.linalg.expm}.
+\carefull{
+This procedure can be iterated by repeatedly applying Lanczos algorithm to approximate \(M_D\) with respect to \(\psi_1 = \exp\of{-\iu \delta M_D} \psi_0\), \(\psi_2 = \exp\of{-\iu \delta M_D}^2 \psi_0\), \dots, \(\psi_{\lfloor t / \delta \rfloor} = \exp\of{-\iu \delta M_D}^{\lfloor t / \delta \rfloor} \psi_0\) in order to obtain an approximation of \(\exp\of{-\iu T H_D} \psi_0\).
+}
+With this approximation for the time-evolution operator at hand, the dynamics of expectation values \(\langle \nn \rangle\) can be evaluated by calculating matrix elements of \(\one\otimes\nn\) in the Krylov basis of each step.
 
-\section{Roadmap}
+Here, the expectation is that there is some saturation in \(\langle \nn \rangle\). 
+If this is the case, the dependence of the saturation value on the number of spins can be analysed and compared for different initial states. 
+Also, if time allows, the dependence of this behaviour on the coupling strength \(\lambda\) can be examined in view of the phase transition found by \textcite{heppSuperradiantPhaseTransition1973}.
+Before the investigation of these questions, a search for a good choice of technical parameters is planned, in order to obtain good computational efficiency.
+The parameters relevant to that are the duration \(\delta\), the number of Lanczos iterations \(K\) and the cut-off \(n_{\mathrm{max}}\) in the bosonic Hilbert space.
+A detailed roadmap for the implementation and for when results are expected can be found in \cref{tab:roadmap}
+
+\begin{table}
+    \caption{A detailed time-table for the necessary implementations according to the project description in \cref{ch:project-description}}
+    \label{tab:roadmap}
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        Milestone & Completed until \dots / completed \\
+        \midrule
+        Generic Lanczos algorithm & done    \\
+        Projection and Embedding functions & \\
+        Time evolution by iterative Lanczos & \\
+        Evaluation of expectation values during the evolution & \\
+        Dicke Hamiltonian as sparse matrix in Dicke-Fock basis & \\
+        Search for suitable \(\delta,\, K,\, n_{\mathrm{max}}\) & \\
+        % \midrule
+        Application to \(\langle \nn \rangle (t)\) & \\
+        Dependence on \(N\) & \\
+        (Dependence on \(\lambda\)) & \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 \appendix
+
+\section{Roadmap for implementation and results}
 
 \section{Proofs skipped in the main text}
 \begin{proof}[Proof of \cref{thm:lanczos-ONB}]
