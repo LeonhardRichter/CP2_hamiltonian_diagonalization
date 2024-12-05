@@ -162,25 +162,30 @@ Before the investigation of these questions, a search for a good choice of techn
 The parameters relevant to that are the duration \(\delta\), the number of Lanczos iterations \(K\) and the cut-off \(n_{\mathrm{max}}\) in the bosonic Hilbert space.
 A detailed roadmap for the implementation and for when results are expected can be found in \cref{tab:roadmap}
 
-\begin{table}
-    \caption{A detailed time-table for the necessary implementations according to the project description in \cref{ch:project-description}}
+\begin{table}[ht]
+    \caption{A detailed time-table for the necessary implementations according to the project description in \cref{ch:project-description}.}
     \label{tab:roadmap}
-    \begin{tabular}{@{}ll@{}}
+    \centering
+    \begin{tabular*}{\textwidth}{@{}l@{\extracolsep{\fill}}l@{}}
         \toprule
-        Milestone & Completed until \dots / completed \\
+        Goal & To be completed \\
         \midrule
-        Generic Lanczos algorithm & done    \\
-        Projection and Embedding functions & \\
-        Time evolution by iterative Lanczos & \\
-        Evaluation of expectation values during the evolution & \\
-        Dicke Hamiltonian as sparse matrix in Dicke-Fock basis & \\
-        Search for suitable \(\delta,\, K,\, n_{\mathrm{max}}\) & \\
+        Generic Lanczos algorithm & done \& tested  \\
+        Projection \(\HH\to\mathcal{K}^{k}_H(\psi_0)\) and embedding \(\mathcal{K}^{k}_H(\psi_0) \hookrightarrow \HH\) & \carefull{10.12.2024}\\
+        Time evolution by repeated Lanczos and \texttt{scipy.linalg.expm} & done \\
+        Evaluation of expectation values during the evolution & \carefull{10.12.2024} \\
+        Spin and boson operators as sparse matrices & 17.12.2024 \\
+        Tensor/ Kronecker product of sparse matrices & 17.12.2024 \\
+        Dicke Hamiltonian as sparse matrix in Dicke-Fock basis & 17.12.2024 \\
+        Search for suitable \(\delta,\, K,\, n_{\mathrm{max}}\) & 20.12.2024 \\
         % \midrule
-        Application to \(\langle \nn \rangle (t)\) & \\
-        Dependence on \(N\) & \\
-        (Dependence on \(\lambda\)) & \\
+        Application to \(\langle \nn \rangle (t)\) & 10.01.2025 \\
+        Dependence on \(N\) & 10.01.2025 \\
+        (Dependence on \(\lambda\)) & (15.01.2025) \\
+        Visualization and fitting & 15.01.2025 \\
+        All results collected / Fix code on GitHub (release) & 15.01.2025 \\
         \bottomrule
-    \end{tabular}
+    \end{tabular*}
 \end{table}
 
 \appendix
