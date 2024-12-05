@@ -39,7 +39,7 @@ def csr_random_self_adjoint(n: int, d: float = 0.01) -> csr:
         dtype=np.complex128,
         random_state=np.random.default_rng(),
     )
-    A = csr(1 / 2 * (sparse_adjoint(A) + A))
+    A = csr(1 / 2 * (adjoint(A) + A))
     assert is_self_adjoint(
         A
     ), "something went wrong: result is not self adjoint"
@@ -57,17 +57,18 @@ def lanczos(
     n, m = A.shape
     assert n == m, "matrix is not quadratic"
     assert is_self_adjoint(A), "matrix is not self-adjoint"
+    assert n == len(v), "Shapes of A and v do not match"
 
     # initialize two arrays a and b for storing the result
     a = np.zeros(dim, dtype=np.float64)
     b = np.zeros(dim - 1, dtype=np.float64)
     # initialize an array for storing the Lanczos basis as row vectors
-    T = np.zeros((n, dim), dtype=np.complex128)
+    basis = np.zeros((dim, n), dtype=np.complex128)
 
     # initialize v and w
     v = v / norm(v)
     w = A @ v
-    T[0] = v
+    basis[0] = v
     # first iteration
     a[0] = np.real(v @ w)
     w = w - a[0] * v  # axpy(-a[0],v,w)
@@ -77,7 +78,7 @@ def lanczos(
             print(f"invariant subspace encountered at i = {i}")
             return
         w = w / b[i - 1]  # w = v_i = \tilde{v_i}/b_i
-        T[i] = w
+        basis[i] = w
         v = -b[i - 1] * v  # v = -b_i v_{i-1}
         v, w = w, v  # v = v_i, w = -b_i v_{i-1}
         # at first, we leave -a_i v_i out, to compute a_i easily without matrix vector product in the next step
@@ -89,10 +90,9 @@ def lanczos(
         b_new = norm(w)
         if i + 1 < dim:
             b[i] = b_new  # b_{i+1} = ||\tilde{v_{i+1}}||
-    T[-1] = w / b_new
-
+    basis[-1] = w / b_new
     # return matrix (dense) in the Lanczos basis, and the matrix (dense) of Lanczos basis vectors as rows
-    return np.diag(a) + np.diag(b[1::], 1) + np.diag(b[1::], -1), T
+    return np.diag(a) + np.diag(b, 1) + np.diag(b, -1), basis
 
     # # build the matrix in this basis (again in csr)
     # indices = np.arange(max_dim)
@@ -141,6 +141,10 @@ def tridiag_to_diag(A: ArrayLike | csr, copy: bool = True):
     return A
 
 
+def expect(A: ArrayLike | csr, v: ArrayLike) -> np.complex128:
+    return np.complex128(adjoint(v) @ A @ v)
+
+
 def lanczos_evo(
     H,
     v,
@@ -149,14 +153,19 @@ def lanczos_evo(
     dt: float = 0.01,
     observables: list = list(),
     lanczos_epsilon: float = 0.001,
-    save_histroy: bool = True,
-):
+    save_states: bool = False,
+    return_final: bool = True,
+) -> tuple[list[float], list[np.ndarray], list[list[np.complex128]]]:
     """
     Compute the evolution of a given initial state under a given Hamiltonian for some time approximated on the Krylow space of given dimension.
     This is done by approximating the Hamiltonian on the Krylow space in tri-diagonal form and evaluating the matrix exponential with scipy expm for some short time.
     The result is applied to the initial state to obtain the initial state for the next iteration.
     For the next iteration, the Hamiltonian is again approximated using Lanczos alogithm, but now with respect to the evolved state.
-    Return either a list of expectation values at given times, or a list of vectors and bases at given times.
+    \n
+    Returns `t`, `v`, `exp` \n
+    `t` : list of times \n
+    `v` : list of states corresponding to times (empty if `save_states` and `return_final` are False) \n
+    `exp`: list of lists for each element of `observables`. Each list contains expectation values at each time in `t` \n
     """
 
     n, m = H.shape
@@ -167,37 +176,78 @@ def lanczos_evo(
     tt = [
         0,
     ]
+
     vt = [
         v,
     ]
-    t = dt
 
-    def update(v, t):
-        if save_histroy:
+    exp = list()
+
+    for A in observables:
+        exp.append(
+            [
+                expect(A, v),
+            ]
+        )
+    if observables == list():
+        exp = [
+            list(),
+        ]
+
+    def update(v, t, vt, tt):
+        tt.append(t)
+        for i, A in enumerate(observables):
+            exp[i].append(expect(A, v))
+        if save_states:
             vt.append(v)
-            tt.append(t)
-        if not save_histroy:
+        if not save_states:
             vt = [
                 v,
-            ]
-            tt = [
-                t,
             ]
 
     def step(dt, v):
         H_approx, basis = lanczos(A=H, v=v, dim=dim, epsilon=lanczos_epsilon)
         U_approx = linalg.expm(-1j * dt * H_approx)
-        v_approx = U_approx @ vt[-1]  # in krylov basis
+        v_approx = np.zeros(len(basis), dtype=np.complex128)
+        v_approx[0] = (
+            1  # the first basis vector in Lanczos basis is v, should be the same as basis @ v
+        )
+        v_approx_new = U_approx @ v_approx  # in krylov basis
         # multiply each basis vector with the parameter of the approximated vector and sum over all rows
-        v_new = np.sum(v_approx * basis, axis=0)  # in full basis
-        return v_new
+        return np.sum(v_approx_new[:, np.newaxis] * basis, axis=0)
 
+    # mainloop
+    t = dt
     while t < T:
         v_new = step(dt, vt[-1])
         t += dt
-        update(v_new, t)
+        update(v_new, t, vt, tt)
     t_rest = T - t
     v_final = step(t_rest, vt[-1])
     t += t + t_rest
-    update(v, t)
-    return tt, vt
+    update(v_final, t, vt, tt)
+    if return_final:
+        return tt, vt, exp
+    if not return_final:
+        return tt, list(), exp
+
+
+if __name__ == "__main__":
+    H = csr_random_self_adjoint(100)
+    A = csr_random_self_adjoint(100)
+    B = csr_random_self_adjoint(100)
+    v = np.random.random_sample(100) + 1j * np.random.random_sample(100)
+
+    K = 10
+
+    H_approx, basis = lanczos(H, v, K)
+
+    print(np.round(H_approx, 2))
+    print(len(basis))
+
+    t, v, e = lanczos_evo(
+        H, v, dim=K, T=0.1, dt=0.01, observables=[A, B], save_states=True
+    )
+    print(len(t))
+    print(len(v))
+    print(np.real(np.round(e, 3)))
