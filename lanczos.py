@@ -1,15 +1,13 @@
-# Author: Leonhard Richter
+# Author: Leonhard Richter, 2024/2025
 # Python script defining the lanczos method for tridiagonalizing a self-adjoing matrix in sparse csr format.
-
-from scipy import linalg
-from scipy import sparse
-from scipy.sparse import csr_array as csr
 
 import numpy as np
 from numpy.typing import ArrayLike
-
+from scipy import linalg, sparse
+from scipy.sparse import csr_array as csr
 
 norm = linalg.norm
+rng = np.random.default_rng()
 # we will use sparse.csr, sparse.random_array, np.random.default_rng
 
 
@@ -151,7 +149,7 @@ def lanczos_evo(
     dim: int,
     T: float,
     dt: float = 0.01,
-    observables: list = list(),
+    observables: tuple = tuple(),
     lanczos_epsilon: float = 0.001,
     save_states: bool = False,
     return_final: bool = True,
@@ -236,7 +234,7 @@ if __name__ == "__main__":
     H = csr_random_self_adjoint(100)
     A = csr_random_self_adjoint(100)
     B = csr_random_self_adjoint(100)
-    v = np.random.random_sample(100) + 1j * np.random.random_sample(100)
+    v = rng.random(100) + 1j * rng.random(100)
 
     K = 10
 
