@@ -73,6 +73,24 @@ def Sz(N: int) -> csr:
     return A
 
 
+def op_per_site(N: int, i: int, qubit_op: csr) -> csr:
+    id_2 = sparse.eye_array(2)
+    if i != 0:
+        op = id_2
+    if i == 0:
+        op = qubit_op
+    for _ in range(i - 2):
+        op = sparse.kron(op, id_2)
+    op = sparse.kron(op, qubit_op)
+    for _ in range(N - i):
+        op = sparse.kron(op, id_2)
+    return op
+
+
+def Sz_full(N: int) -> csr:
+    return sum([op_per_site(N, i, Z) for i in range(N)])
+
+
 def Sp(N: int) -> csr:
     basis = dicke_basis(N)
     dim = dicke_dim(N)
@@ -91,6 +109,14 @@ def Sp(N: int) -> csr:
     return A
 
 
+def Sp_full(N: int) -> csr:
+    row_ind = [0]
+    col_ind = [1]
+    data = [1]
+    sp = csr((data, (row_ind, col_ind)), shape=(2, 2))
+    return sum([op_per_site(N, i, sp) for i in range(N)])
+
+
 def Sm(N: int) -> csr:
     basis = dicke_basis(N)
     dim = dicke_dim(N)
@@ -107,6 +133,14 @@ def Sm(N: int) -> csr:
     A = csr((data, (row_ind, col_ind)), shape=(dim, dim))
     A.eliminate_zeros()
     return A
+
+
+def Sm_full(N: int) -> csr:
+    row_ind = [0]
+    col_ind = [1]
+    data = [1]
+    sm = csr((data, (row_ind, col_ind)), shape=(2, 2))
+    return sum([op_per_site(N, i, sm) for i in range(N)])
 
 
 # attention: for the bosonic part we use an increasing ordering such that when
@@ -162,7 +196,7 @@ def num(n_max: int) -> csr:
     return A
 
 
-def H_D(
+def dicke_hamiltonian(
     N: int,
     n_max: int,
     coupling: float = 1.0,
@@ -177,6 +211,24 @@ def H_D(
         energy_gap / 2 * sparse.kron(Sz(N), n_id)
         + frequency * sparse.kron(N_id, num(n_max))
         + coupling * sparse.kron(Sp(N) + Sm(N), Ad(n_max) + An(n_max))
+    )
+
+
+def dicke_hamiltonian_full(
+    N: int,
+    n_max: int,
+    coupling: float = 1.0,
+    frequency: float = 1.0,
+    energy_gap=None,
+) -> csr:
+    if energy_gap is None:
+        energy_gap = frequency
+    n_id = sparse.eye_array(n_max + 1)
+    N_id = sparse.eye_array(2**N)
+    return (
+        energy_gap / 2 * sparse.kron(Sz_full(N), n_id)
+        + frequency * sparse.kron(N_id, num(n_max))
+        + coupling * sparse.kron(Sp_full(N) + Sm_full(N), Ad(n_max) + An(n_max))
     )
 
 
@@ -256,3 +308,18 @@ if __name__ == "__main__":
 
     print(">>>np.round(num(5).toarray(),3)")
     print(np.round(num(5).toarray(), 3))
+
+    # print(">>>H_D = dicke_hamiltonian(5, 15)")
+    # H_D = dicke_hamiltonian(5, 15)
+    # print(H_D)
+
+    # print(">>>H_D.nnz/(H_D.shape[0]*H_D.shape[1])")
+    # print(H_D.nnz / (H_D.shape[0] * H_D.shape[1]))
+
+    print(
+        ">>>H_D = dicke_hamiltonian(50, 125, coupling=0.1, frequency=10, energy_gap=9)"
+    )
+    H_D = dicke_hamiltonian(50, 125, coupling=0.1, frequency=10, energy_gap=9)
+    print(H_D)
+    print(">>>H_D.nnz/(H_D.shape[0]*H_D.shape[1])")
+    print(H_D.nnz / (H_D.shape[0] * H_D.shape[1]))
