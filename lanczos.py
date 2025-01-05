@@ -6,6 +6,8 @@ from numpy.typing import ArrayLike
 from scipy import linalg, sparse
 from scipy.sparse import csr_array as csr
 
+from tqdm import tqdm
+
 norm = linalg.norm
 rng = np.random.default_rng()
 # we will use sparse.csr, sparse.random_array, np.random.default_rng
@@ -163,7 +165,7 @@ def lanczos_evo(
     Returns `t`, `v`, `exp` \n
     `t` : list of times \n
     `v` : list of states corresponding to times (empty if `save_states` and `return_final` are False) \n
-    `exp`: list of lists for each element of `observables`. Each list contains expectation values at each time in `t` \n
+    `obs`: list of lists for each element of `observables`. Each list contains expectation values at each time in `t` \n
     """
 
     n, m = H.shape
@@ -179,23 +181,23 @@ def lanczos_evo(
         v,
     ]
 
-    exp = list()
+    obs = list()
 
     for A in observables:
-        exp.append(
+        obs.append(
             [
                 expect(A, v),
             ]
         )
     if observables == list():
-        exp = [
+        obs = [
             list(),
         ]
 
     def update(v, t, vt, tt):
         tt.append(t)
         for i, A in enumerate(observables):
-            exp[i].append(expect(A, v))
+            obs[i].append(expect(A, v))
         if save_states:
             vt.append(v)
         if not save_states:
@@ -215,19 +217,22 @@ def lanczos_evo(
         return np.sum(v_approx_new[:, np.newaxis] * basis, axis=0)
 
     # mainloop
-    t = dt
-    while t < T:
-        v_new = step(dt, vt[-1])
-        t += dt
-        update(v_new, t, vt, tt)
-    t_rest = T - t
-    v_final = step(t_rest, vt[-1])
-    t += t + t_rest
-    update(v_final, t, vt, tt)
+    with tqdm(total=T // dt + 1) as pbar:
+        t = dt
+        while t < T:
+            v_new = step(dt, vt[-1])
+            t += dt
+            update(v_new, t, vt, tt)
+            pbar.update(1)
+        t_rest = T - t
+        v_final = step(t_rest, vt[-1])
+        t += t + t_rest
+        update(v_final, t, vt, tt)
+        pbar.update(1)
     if return_final:
-        return tt, vt, exp
+        return tt, vt, obs
     if not return_final:
-        return tt, list(), exp
+        return tt, list(), obs
 
 
 if __name__ == "__main__":
