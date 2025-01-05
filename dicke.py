@@ -1,7 +1,7 @@
 import numpy as np
 from fractions import Fraction
 from scipy.sparse import csr_array as csr
-from scipy import sparse, linalg
+from scipy import sparse
 
 
 def j_list_gen(N) -> tuple[int | Fraction]:
@@ -230,6 +230,29 @@ def dicke_hamiltonian_full(
         + frequency * sparse.kron(N_id, num(n_max))
         + coupling * sparse.kron(Sp_full(N) + Sm_full(N), Ad(n_max) + An(n_max))
     )
+
+
+def dicke_excited(N: int) -> np.ndarray[np.complex128]:
+    v = np.zeros(shape=dicke_dim(N), dtype=np.complex128)
+    v[0] = 1
+    return v
+
+
+def dicke_superradiant(N: int) -> np.ndarray[np.complex128]:
+    """
+    Gives the vector representation of the superradiant state in the Dicke basis.
+    This is, for even N, the state j= N/2, m=0 and for odd N the state with j=N/2, m=1/2.
+    """
+    basis = dicke_basis(N)
+    v = np.zeros(shape=dicke_dim(N), dtype=np.complex128)
+    jm = (Fraction(N, 2), Fraction(1, 2)) if N % 2 == 0 else (N / 2, 0)
+    v[basis.index(jm)] = 1
+
+
+def fock(n: int, n_max: int) -> np.ndarray[np.complex128]:
+    v = np.zeros(n_max + 1, dtype=np.complex128)
+    v[n] = 1
+    return v
 
 
 if __name__ == "__main__":
