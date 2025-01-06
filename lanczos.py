@@ -6,6 +6,8 @@ from numpy.typing import ArrayLike
 from scipy import linalg, sparse
 from scipy.sparse import csr_array as csr
 
+from typing import Union
+
 from tqdm import tqdm
 
 norm = linalg.norm
@@ -13,11 +15,11 @@ rng = np.random.default_rng()
 # we will use sparse.csr, sparse.random_array, np.random.default_rng
 
 
-def adjoint(A: csr | ArrayLike):
+def adjoint(A: Union[csr, ArrayLike]):
     return A.transpose().conj()
 
 
-def is_self_adjoint(A: csr | ArrayLike) -> bool:
+def is_self_adjoint(A: Union[csr, ArrayLike]) -> bool:
     n, m = A.shape
     if n != m:
         print("Matrix is not quadratic")
@@ -105,7 +107,7 @@ def lanczos(
     # return diag + lower_diag + upper_diag
 
 
-def tridiag_to_diag(A: ArrayLike | csr, copy: bool = True):
+def tridiag_to_diag(A: Union[ArrayLike, csr], copy: bool = True):
     """
     [[WIP]] function to diagonalize a real, symmetric, tridiagonal matrix, resulting from the Lanczos algorithm.
     """
@@ -141,7 +143,7 @@ def tridiag_to_diag(A: ArrayLike | csr, copy: bool = True):
     return A
 
 
-def expect(A: ArrayLike | csr, v: ArrayLike) -> np.complex128:
+def expect(A: Union[ArrayLike, csr], v: ArrayLike) -> np.complex128:
     return np.complex128(adjoint(v) @ A @ v)
 
 

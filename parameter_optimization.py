@@ -29,6 +29,8 @@ time_step_range = [0.0001, 0.001, 0.01, 0.1, 0.2, 0.5]
 
 data = dict()
 
+path = input("path/to/data.pickle:")
+
 
 def test_parameters(parameters: tuple):
     cut_off, iterations, time_step = parameters

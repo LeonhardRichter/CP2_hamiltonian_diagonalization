@@ -3,8 +3,10 @@ from fractions import Fraction
 from scipy.sparse import csr_array as csr
 from scipy import sparse
 
+from typing import Union
 
-def j_list_gen(N) -> tuple[int | Fraction]:
+
+def j_list_gen(N) -> tuple[Union[int, Fraction]]:
     jj = list()
     j = Fraction(N, 2)
     if j.is_integer():
@@ -17,7 +19,7 @@ def j_list_gen(N) -> tuple[int | Fraction]:
     return tuple(jj)
 
 
-def m_list_gen(j: int | Fraction) -> tuple[int | Fraction]:
+def m_list_gen(j: Union[int, Fraction]) -> tuple[Union[int, Fraction]]:
     return tuple(j - _ for _ in range(int(2 * j) + 1))
 
 
@@ -25,7 +27,7 @@ def dicke_dim(N: int):
     return sum([len([m for m in m_list_gen(j)]) for j in j_list_gen(N)])
 
 
-def dicke_basis(N: int) -> tuple[tuple[int | Fraction]]:
+def dicke_basis(N: int) -> tuple[tuple[Union[int, Fraction]]]:
     """
     Gives a tuple of 2-tuples.
     Each 2-touple containts the j and m of one Dicke state.
