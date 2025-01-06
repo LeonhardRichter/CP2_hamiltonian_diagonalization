@@ -11,17 +11,76 @@ from lanczos import lanczos_evo as evo
 
 from dicke import dicke_hamiltonian, dicke_excited, fock
 
+import timeit
+
+from itertools import combinations
+
 N = 10
 coupling = 0.1
 frequency = 1
 
-cut_off_0 = 3 * N
-iterations = 100
-time_step = 0.0001
+cut_off_range = [3 * N, 5 / 2 * N, 2 * N, 3 / 2 * N, N, 1 / 2 * N]
+cut_off_range = [int(x) for x in cut_off_range]
 
-H = dicke_hamiltonian(
-    N=N, n_max=cut_off_0, coupling=coupling, frequency=frequency
-)
-v = np.kron(dicke_excited(N), fock(0, cut_off_0))
+iterations_range = [100, 80, 60, 40, 20, 10, 8, 6, 4, 2, 1]
+time_step_range = [0.0001, 0.001, 0.01, 0.1, 0.2, 0.5]
 
-t, v, obs = evo(H, v, dim=iterations + 1, T=1.0, dt=time_step)
+data = dict()
+
+
+def test_parameters(parameters: tuple):
+    cut_off, iterations, time_step = parameters
+
+    H = dicke_hamiltonian(
+        N=N, n_max=cut_off, coupling=coupling, frequency=frequency
+    )
+    v = np.kron(dicke_excited(N), fock(0, cut_off))
+
+    start = timeit.default_timer()
+    t, v, obs = evo(H, v, dim=iterations + 1, T=1.0, dt=time_step)
+    stop = timeit.default_timer()
+    duration = stop - start
+    return v, duration
+
+
+if True:
+    data["test cut_off"] = dict()
+    iterations = iterations_range[0]
+    time_step = time_step_range[0]
+
+    for cut_off in cut_off_range:
+        parameters = (cut_off, iterations, time_step)
+        data["test cut_off"][parameters] = dict()
+
+        v, duration = test_parameters(parameters)
+
+        data["test cut_off"][parameters]["final vector"] = v
+        data["test cut_off"][parameters]["duration"] = duration
+
+if False:
+    cut_off = cut_off_range[0]
+    time_step = time_step_range[0]
+    data["test iterations"] = dict()
+
+    for iterations in iterations_range:
+        parameters = (cut_off, iterations, time_step)
+        data["test iterations"][parameters] = dict()
+
+        v, duration = test_parameters(parameters)
+
+        data["test iterations"][parameters]["final vector"] = v
+        data["test iterations"][parameters]["duration"] = duration
+
+if False:
+    data["test time_step"] = dict()
+    cut_off = cut_off_range[0]
+    iterations = iterations_range[0]
+
+    for time_step in time_step_range:
+        parameters = (cut_off, iterations, time_step)
+        data["test time_step"][parameters] = dict()
+
+        v, duration = test_parameters(parameters)
+
+        data["test time_step"][parameters]["final vector"] = v
+        data["test time_step"][parameters]["duration"] = duration
