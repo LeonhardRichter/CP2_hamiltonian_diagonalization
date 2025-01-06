@@ -15,6 +15,8 @@ import timeit
 
 from itertools import combinations
 
+import pickle
+
 N = 10
 coupling = 0.1
 frequency = 1
@@ -57,7 +59,10 @@ if True:
         data["test cut_off"][parameters]["final vector"] = v
         data["test cut_off"][parameters]["duration"] = duration
 
-if False:
+with open("parameters_optimization_data.pickle", "wb") as file:
+    pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
+
+if True:
     cut_off = cut_off_range[0]
     time_step = time_step_range[0]
     data["test iterations"] = dict()
@@ -71,7 +76,10 @@ if False:
         data["test iterations"][parameters]["final vector"] = v
         data["test iterations"][parameters]["duration"] = duration
 
-if False:
+with open("parameters_optimization_data.pickle", "wb") as file:
+    pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
+
+if True:
     data["test time_step"] = dict()
     cut_off = cut_off_range[0]
     iterations = iterations_range[0]
@@ -84,3 +92,6 @@ if False:
 
         data["test time_step"][parameters]["final vector"] = v
         data["test time_step"][parameters]["duration"] = duration
+
+with open("parameters_optimization_data.pickle", "wb") as file:
+    pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
