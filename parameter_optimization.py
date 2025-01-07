@@ -5,17 +5,13 @@
 # Date: 05.01.2025
 
 
-import numpy as np
-
-from lanczos import lanczos_evo as evo
-
-from dicke import dicke_hamiltonian, dicke_excited, fock
-
+import pickle
 import timeit
 
-from itertools import combinations
+import numpy as np
 
-import pickle
+from dicke import dicke_excited, dicke_hamiltonian, fock
+from lanczos import lanczos_evo as evo
 
 N = 10
 coupling = 0.1
