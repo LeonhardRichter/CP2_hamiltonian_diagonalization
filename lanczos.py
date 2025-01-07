@@ -78,7 +78,7 @@ def lanczos(
     for i in range(1, dim):
         if abs(b[i - 1]) < epsilon:
             print(f"invariant subspace encountered at i = {i}")
-            return
+            return np.diag(a) + np.diag(b, 1) + np.diag(b, -1), basis
         w = w / b[i - 1]  # w = v_i = \tilde{v_i}/b_i
         basis[i] = w
         v = -b[i - 1] * v  # v = -b_i v_{i-1}
