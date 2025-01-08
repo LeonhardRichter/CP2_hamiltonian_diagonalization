@@ -12,6 +12,7 @@ import numpy as np
 
 from dicke import dicke_excited, dicke_hamiltonian, fock
 from lanczos import lanczos_evo as evo
+import datetime
 
 N = 10
 coupling = 0.1
@@ -27,6 +28,11 @@ data = dict()
 
 path = input("path/to/data.pickle:")
 
+now = datetime.datetime.now()
+
+if path == "":
+    path = f"./parameter_optimization{now.strftime("%d_%m_%Y-%H_%M_%S")}.pickle"
+
 
 def test_parameters(parameters: tuple):
     cut_off, iterations, time_step = parameters
@@ -37,10 +43,10 @@ def test_parameters(parameters: tuple):
     v = np.kron(dicke_excited(N), fock(0, cut_off))
 
     start = timeit.default_timer()
-    t, v, obs = evo(H, v, dim=iterations + 1, T=1.0, dt=time_step)
+    tt, vt, obs = evo(H, v, dim=iterations + 1, T=1.0, dt=time_step)
     stop = timeit.default_timer()
     duration = stop - start
-    return v, duration
+    return vt, duration
 
 
 if True:
@@ -52,9 +58,9 @@ if True:
         parameters = (cut_off, iterations, time_step)
         data["test cut_off"][parameters] = dict()
 
-        v, duration = test_parameters(parameters)
+        vt, duration = test_parameters(parameters)
 
-        data["test cut_off"][parameters]["final vector"] = v
+        data["test cut_off"][parameters]["final vector"] = vt
         data["test cut_off"][parameters]["duration"] = duration
 
 with open("parameters_optimization_data.pickle", "wb") as file:
@@ -69,9 +75,9 @@ if True:
         parameters = (cut_off, iterations, time_step)
         data["test iterations"][parameters] = dict()
 
-        v, duration = test_parameters(parameters)
+        vt, duration = test_parameters(parameters)
 
-        data["test iterations"][parameters]["final vector"] = v
+        data["test iterations"][parameters]["final vector"] = vt
         data["test iterations"][parameters]["duration"] = duration
 
 with open("parameters_optimization_data.pickle", "wb") as file:
@@ -86,9 +92,9 @@ if True:
         parameters = (cut_off, iterations, time_step)
         data["test time_step"][parameters] = dict()
 
-        v, duration = test_parameters(parameters)
+        vt, duration = test_parameters(parameters)
 
-        data["test time_step"][parameters]["final vector"] = v
+        data["test time_step"][parameters]["final vector"] = vt
         data["test time_step"][parameters]["duration"] = duration
 
 with open("parameters_optimization_data.pickle", "wb") as file:
