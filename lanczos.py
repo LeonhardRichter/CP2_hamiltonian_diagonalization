@@ -183,23 +183,23 @@ def lanczos_evo(
         v,
     ]
 
-    obs = list()
+    exp = list()
 
     for A in observables:
-        obs.append(
+        exp.append(
             [
                 expect(A, v),
             ]
         )
     if observables == list():
-        obs = [
+        exp = [
             list(),
         ]
 
     def update(v, t, vt, tt):
         tt.append(t)
         for i, A in enumerate(observables):
-            obs[i].append(expect(A, v))
+            exp[i].append(expect(A, v))
         if save_states:
             vt.append(v)
         if not save_states:
@@ -228,13 +228,13 @@ def lanczos_evo(
             pbar.update(1)
         t_rest = T - t
         v_final = step(t_rest, vt[-1])
-        t += t + t_rest
+        t += t_rest
         update(v_final, t, vt, tt)
         pbar.update(1)
     if return_final:
-        return tt, vt, obs
+        return tt, vt, exp
     if not return_final:
-        return tt, list(), obs
+        return tt, list(), exp
 
 
 if __name__ == "__main__":
@@ -250,10 +250,11 @@ if __name__ == "__main__":
     print(np.round(H_approx, 2))
     print(len(basis))
 
-    tt, vt, obs = lanczos_evo(
+    tt, vt, exp = lanczos_evo(
         H, v, dim=K, T=0.1, dt=0.01, observables=[A, B], save_states=True
     )
     print(len(tt))
     print(len(vt))
     print(np.linalg.norm(vt[-1] - v))
-    print(np.real(np.round(obs, 3)))
+    print(np.real(np.round(exp, 3)))
+    print(np.isclose(tt[-1], 0.1))
