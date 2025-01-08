@@ -107,40 +107,40 @@ def lanczos(
     # return diag + lower_diag + upper_diag
 
 
-def tridiag_to_diag(A: Union[ArrayLike, csr], copy: bool = True):
-    """
-    [[WIP]] function to diagonalize a real, symmetric, tridiagonal matrix, resulting from the Lanczos algorithm.
-    """
-    # we diagonalize from top to bottom by row manipulations
-    if copy:
-        A = A.copy()
+# def tridiag_to_diag(A: Union[ArrayLike, csr], copy: bool = True):
+#     """
+#     [[WIP]] function to diagonalize a real, symmetric, tridiagonal matrix, resulting from the Lanczos algorithm.
+#     """
+#     # we diagonalize from top to bottom by row manipulations
+#     if copy:
+#         A = A.copy()
 
-    n = A.shape[0] - 1
-    for i in range(0, n):
-        # goal: diagonalize the i-th row
-        Ai1i1 = A[[i + 1], [i + 1]]
-        if Ai1i1 != 0:
-            c = A[[i], [i + 1]] / Ai1i1
-            A[[i], [i]] = A[[i], [i]] - c * A[[i + 1], [i]]
-            # the entry right to the diagonal is zero now:
-            # A[[i], [i+1]] = A[[i],[i+1]] - c*A[[i+1],[i+1]] = 0
-            A[[i], [i + 1]] = 0
-        else:
-            print(f"zero diagonal encountered in row {i+1}, aborting")
-            print(A.toarray().round(2))
-            break
-        if i > 0:
-            if A[[i - 1], [i - 1]] != 0:
-                A[[i, i - 1]] = 0
-            else:
-                print(f"zero diagonal encountered in row {i-1}, aborting")
-                print(A.toarray().round(2))
-                break
+#     n = A.shape[0] - 1
+#     for i in range(0, n):
+#         # goal: diagonalize the i-th row
+#         Ai1i1 = A[[i + 1], [i + 1]]
+#         if Ai1i1 != 0:
+#             c = A[[i], [i + 1]] / Ai1i1
+#             A[[i], [i]] = A[[i], [i]] - c * A[[i + 1], [i]]
+#             # the entry right to the diagonal is zero now:
+#             # A[[i], [i+1]] = A[[i],[i+1]] - c*A[[i+1],[i+1]] = 0
+#             A[[i], [i + 1]] = 0
+#         else:
+#             print(f"zero diagonal encountered in row {i+1}, aborting")
+#             print(A.toarray().round(2))
+#             break
+#         if i > 0:
+#             if A[[i - 1], [i - 1]] != 0:
+#                 A[[i, i - 1]] = 0
+#             else:
+#                 print(f"zero diagonal encountered in row {i-1}, aborting")
+#                 print(A.toarray().round(2))
+#                 break
 
-    # diagonalize the last row by the diagonal row above
-    if A[[n - 1], [n - 1]] != 0:
-        A[[n], [n - 1]] = 0
-    return A
+#     # diagonalize the last row by the diagonal row above
+#     if A[[n - 1], [n - 1]] != 0:
+#         A[[n], [n - 1]] = 0
+#     return A
 
 
 def expect(A: Union[ArrayLike, csr], v: ArrayLike) -> np.complex128:
@@ -250,9 +250,10 @@ if __name__ == "__main__":
     print(np.round(H_approx, 2))
     print(len(basis))
 
-    t, v, e = lanczos_evo(
+    tt, vt, obs = lanczos_evo(
         H, v, dim=K, T=0.1, dt=0.01, observables=[A, B], save_states=True
     )
-    print(len(t))
-    print(len(v))
-    print(np.real(np.round(e, 3)))
+    print(len(tt))
+    print(len(vt))
+    print(np.linalg.norm(vt[-1] - v))
+    print(np.real(np.round(obs, 3)))
