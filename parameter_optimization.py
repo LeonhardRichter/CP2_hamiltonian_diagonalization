@@ -32,7 +32,7 @@ path = input("path/to/data.pickle:")
 now = datetime.datetime.now()
 
 if path == "":
-    path = f"./parameter_optimization{now.strftime("%d_%m_%Y-%H_%M_%S")}.pickle"
+    path = f"parameter_optimization{now.strftime("%d_%m_%Y-%H_%M_%S")}.pickle"
 
 
 def test_parameters(parameters: tuple):
@@ -64,7 +64,7 @@ if True:
         data["test cut_off"][parameters]["final vector"] = vt
         data["test cut_off"][parameters]["duration"] = duration
 
-    with open("parameters_optimization_data.pickle", "wb") as file:
+    with open(path, "wb") as file:
         pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 if True:
@@ -81,7 +81,7 @@ if True:
         data["test iterations"][parameters]["final vector"] = vt
         data["test iterations"][parameters]["duration"] = duration
 
-    with open("parameters_optimization_data.pickle", "wb") as file:
+    with open(path, "wb") as file:
         pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 if True:
@@ -98,5 +98,5 @@ if True:
         data["test time_step"][parameters]["final vector"] = vt
         data["test time_step"][parameters]["duration"] = duration
 
-    with open("parameters_optimization_data.pickle", "wb") as file:
+    with open(path, "wb") as file:
         pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
