@@ -196,16 +196,14 @@ def lanczos_evo(
             list(),
         ]
 
-    def update(v, t, vt, tt):
+    def update(v_new, t, vt, tt):
         tt.append(t)
         for i, A in enumerate(observables):
-            exp[i].append(expect(A, v))
+            exp[i].append(expect(A, v_new))
         if save_states:
-            vt.append(v)
+            vt.append(v_new)
         if not save_states:
-            vt = [
-                v,
-            ]
+            vt[-1] = v_new
 
     def step(dt, v):
         H_approx, basis = lanczos(A=H, v=v, dim=dim, epsilon=lanczos_epsilon)
@@ -255,6 +253,7 @@ if __name__ == "__main__":
     )
     print(len(tt))
     print(len(vt))
+    print("distance final to initial")
     print(np.linalg.norm(vt[-1] - v))
     print(np.real(np.round(exp, 3)))
     print(np.isclose(tt[-1], 0.1))
