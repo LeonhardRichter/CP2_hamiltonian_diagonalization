@@ -103,7 +103,7 @@ if __name__ == "__main__":
     NN = range(min_N, max_N + 1)
 
     data = list()
-    for N in tqdm(NN):
+    for N in tqdm(NN[::-1]):
         tt, vt, et = sim_dicke(
             N,
             T,
