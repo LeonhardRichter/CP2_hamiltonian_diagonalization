@@ -15,14 +15,15 @@ from lanczos import lanczos_evo as evo
 import datetime
 
 N = 10
-coupling = 0.1
+coupling = 1
 frequency = 1
+T = 10
 
 cut_off_range = [3 * N, 5 / 2 * N, 2 * N, 3 / 2 * N, N, 1 / 2 * N]
 cut_off_range = [int(x) for x in cut_off_range]
 
-iterations_range = [100, 80, 60, 40, 20, 10, 8, 6, 4, 2, 1]
-time_step_range = [0.0001, 0.001, 0.01, 0.1, 0.2, 0.5]
+iterations_range = [60, 40, 20, 10, 8, 6, 4, 2, 1]
+time_step_range = [0.0001 * T, 0.001 * T, 0.01 * T, 0.1 * T, 0.2 * T, 0.5 * T]
 
 data = dict()
 
@@ -43,7 +44,7 @@ def test_parameters(parameters: tuple):
     v = np.kron(dicke_excited(N), fock(0, cut_off))
 
     start = timeit.default_timer()
-    tt, vt, obs = evo(H, v, dim=iterations + 1, T=1.0, dt=time_step)
+    tt, vt, obs = evo(H, v, dim=iterations + 1, T=T, dt=time_step)
     stop = timeit.default_timer()
     duration = stop - start
     return vt, duration
@@ -63,8 +64,8 @@ if True:
         data["test cut_off"][parameters]["final vector"] = vt
         data["test cut_off"][parameters]["duration"] = duration
 
-with open("parameters_optimization_data.pickle", "wb") as file:
-    pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
+    with open("parameters_optimization_data.pickle", "wb") as file:
+        pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 if True:
     cut_off = cut_off_range[0]
@@ -80,8 +81,8 @@ if True:
         data["test iterations"][parameters]["final vector"] = vt
         data["test iterations"][parameters]["duration"] = duration
 
-with open("parameters_optimization_data.pickle", "wb") as file:
-    pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
+    with open("parameters_optimization_data.pickle", "wb") as file:
+        pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 if True:
     data["test time_step"] = dict()
@@ -97,5 +98,5 @@ if True:
         data["test time_step"][parameters]["final vector"] = vt
         data["test time_step"][parameters]["duration"] = duration
 
-with open("parameters_optimization_data.pickle", "wb") as file:
-    pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
+    with open("parameters_optimization_data.pickle", "wb") as file:
+        pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
