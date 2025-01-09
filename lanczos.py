@@ -157,6 +157,7 @@ def lanczos_evo(
     lanczos_epsilon: float = 0.001,
     save_states: bool = False,
     return_final: bool = True,
+    progress_bar: bool = True,
 ) -> tuple[list[float], list[np.ndarray], list[list[np.complex128]]]:
     """
     Compute the evolution of a given initial state under a given Hamiltonian for some time approximated on the Krylow space of given dimension.
@@ -217,7 +218,7 @@ def lanczos_evo(
         return np.sum(v_approx_new[:, np.newaxis] * basis, axis=0)
 
     # mainloop
-    with tqdm(total=T // dt + 1) as pbar:
+    with tqdm(total=T // dt + 1, disable=not progress_bar) as pbar:
         t = dt
         while t < T:
             v_new = step(dt, vt[-1])
