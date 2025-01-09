@@ -13,6 +13,7 @@ from dicke import (
 from lanczos import lanczos_evo
 import pickle
 from datetime import datetime
+from tqdm import tqdm
 
 
 def n_max(N):
@@ -102,7 +103,7 @@ if __name__ == "__main__":
     NN = range(min_N, max_N + 1)
 
     data = list()
-    for N in NN:
+    for N in tqdm(NN):
         tt, vt, et = sim_dicke(
             N,
             T,
