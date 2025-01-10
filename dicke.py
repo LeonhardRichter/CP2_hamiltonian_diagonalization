@@ -249,6 +249,14 @@ def dicke_superradiant(N: int) -> np.ndarray[np.complex128]:
     v = np.zeros(shape=dicke_dim(N), dtype=np.complex128)
     jm = (Fraction(N, 2), Fraction(1, 2)) if N % 2 == 0 else (N / 2, 0)
     v[basis.index(jm)] = 1
+    return v
+
+
+def dicke_state(N: int, jm: tuple[int | Fraction]) -> np.ndarray[np.complex128]:
+    basis = dicke_basis(N)
+    v = np.zeros(shape=dicke_dim(N), dtype=np.complex128)
+    v[basis.index(jm)] = 1
+    return v
 
 
 def fock(n: int, n_max: int) -> np.ndarray[np.complex128]:
