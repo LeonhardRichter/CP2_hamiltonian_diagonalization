@@ -7,6 +7,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 from scipy import sparse
 from tqdm import tqdm
+import timeit
 
 from dicke import (
     dicke_dim,
@@ -19,15 +20,16 @@ from dicke import (
 from lanczos import lanczos_evo
 
 
-def n_max(N):
+def n_max_default(N) -> int:
     return 2 * N
 
 
-lanczos_iterations = 10
+lanczos_iterations_default = 10
 
 
-def time_step(T):
-    return T / 1000
+def time_step_default(T) -> float:
+    0.001
+    # return T / 1000
 
 
 def sim_dicke(
@@ -37,19 +39,31 @@ def sim_dicke(
     spin_state_name: str | tuple[int | Fraction] = "excited",
     freq: float = 1.0,
     coup: float = 1.0,
+    time_step: float | None = None,
+    n_max: int | None = None,
+    lanczos_iterations: int | None = None,
     progress_bar: bool = True,
 ):
-    H = dicke_hamiltonian(N, n_max(N), coupling=coup, frequency=freq)
-    photon_state = np.zeros(n_max(N) + 1)
-    photon_state[n] = 1
+    if time_step is None:
+        time_step = time_step_default(T)
 
+    if n_max is None:
+        n_max = n_max_default(N)
+
+    if lanczos_iterations is None:
+        lanczos_iterations = lanczos_iterations_default
+
+    H = dicke_hamiltonian(N, n_max, coupling=coup, frequency=freq)
+    photon_state = np.zeros(n_max + 1)
+    photon_state[n] = 1
+    print(spin_state_name)
     if spin_state_name == "excited":
         spin_state = dicke_excited(N)
 
-    if spin_state_name == "superradiant":
+    elif spin_state_name == "superradiant":
         spin_state = dicke_superradiant(N)
 
-    if type(spin_state_name) is tuple and len(spin_state_name) == 2:
+    elif type(spin_state_name) is tuple and len(spin_state_name) == 2:
         spin_state = dicke_state(spin_state_name)
 
     assert spin_state.shape[0] == dicke_dim(
@@ -58,20 +72,21 @@ def sim_dicke(
 
     state = np.kron(spin_state, photon_state)
 
-    id_o_num = sparse.kron(sparse.eye_array(dicke_dim(N)), num(n_max(N)))
-
+    id_o_num = sparse.kron(sparse.eye_array(dicke_dim(N)), num(n_max))
+    start = timeit.default_timer()
     tt, vt, et = lanczos_evo(
         H,
         state,
         observables=(id_o_num,),
         dim=lanczos_iterations + 1,
         T=T,
-        dt=time_step(T),
+        dt=time_step,
         return_final=False,
         save_states=False,
         progress_bar=progress_bar,
     )
-    return tt, vt, et
+    stop = timeit.default_timer()
+    return tt, vt, et, stop - start
 
 
 if __name__ == "__main__":
@@ -132,7 +147,7 @@ if __name__ == "__main__":
 
     data = list()
     for N in tqdm(NN[::-1]):
-        tt, vt, et = sim_dicke(
+        tt, vt, et, duration = sim_dicke(
             N=N,
             T=T,
             spin_state_name=spin_state_name,
@@ -144,6 +159,7 @@ if __name__ == "__main__":
             {
                 "N": N,
                 "spin_state": spin_state_name,
+                "duration": duration,
                 "tt": tt,
                 "vt": vt,
                 "et": et,
