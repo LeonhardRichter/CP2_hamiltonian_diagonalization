@@ -52,7 +52,7 @@ def sim_dicke(
     if type(spin_state_name) is tuple and len(spin_state_name) == 2:
         spin_state = dicke_state(spin_state_name)
 
-    assert spin_state.shape() == dicke_dim(
+    assert spin_state.shape[0] == dicke_dim(
         N
     ), "Dimension of given spin state does not match the number of Dicke atoms"
 
