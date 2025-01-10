@@ -247,7 +247,7 @@ def dicke_superradiant(N: int) -> np.ndarray[np.complex128]:
     """
     basis = dicke_basis(N)
     v = np.zeros(shape=dicke_dim(N), dtype=np.complex128)
-    jm = (Fraction(N, 2), Fraction(1, 2)) if N % 2 == 0 else (N / 2, 0)
+    jm = (Fraction(N, 2), 0) if N % 2 == 0 else (Fraction(N, 2), Fraction(1, 2))
     v[basis.index(jm)] = 1
     return v
 
@@ -356,3 +356,4 @@ if __name__ == "__main__":
     print(H_D)
     print(">>>H_D.nnz/(H_D.shape[0]*H_D.shape[1])")
     print(H_D.nnz / (H_D.shape[0] * H_D.shape[1]))
+    print(dicke_superradiant(3))
