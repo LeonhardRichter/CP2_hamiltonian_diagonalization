@@ -84,14 +84,14 @@ if __name__ == "__main__":
         max_N = int(input("max_N [20]: ").strip() or "20")
         step_N = int(input("step_N [1]: ").strip() or "1")
 
-        spin_state = (
+        spin_state_name = (
             input("spin_state [EXCITED, superradiant, (j,m)]: ").strip()
             or "excited"
         ).lower()
-        if spin_state not in {"excited", "superradiant"}:
-            spin_state = literal_eval(spin_state)
+        if spin_state_name not in {"excited", "superradiant"}:
+            spin_state_name = literal_eval(spin_state_name)
             assert (
-                type(spin_state) is tuple and len(spin_state) == 2
+                type(spin_state_name) is tuple and len(spin_state_name) == 2
             ), "unsuported input type"
 
         T = float(input("T [6.0]: ").strip() or "6.0")
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             input(
                 "path/to/data.pickle [./dicke_sim_d_m_Y-H_M_S_spin-state_N-min_N-max_N_T-T.pickle]:"
             ).strip()
-            or f"dicke_sim_{now.strftime("%d_%m_%Y-%H_%M_%S")}_{spin_state}_N-{min_N}-{max_N}_T-{T}.pickle"
+            or f"dicke_sim_{now.strftime("%d_%m_%Y-%H_%M_%S")}_{spin_state_name}_N-{min_N}-{max_N}_T-{T}.pickle"
         )
         show_progress_bars = (
             input("show progress bars [yes/NO]: ").strip() or "no"
@@ -110,7 +110,7 @@ if __name__ == "__main__":
         min_N = 2
         max_N = 20
         step_N = 1
-        spin_state = "excited"
+        spin_state_name = "excited"
         T = 6.0
         now = datetime.now()
         path = f"dicke_sim_{now.strftime("%d_%m_%Y-%H_%M_%S")}_excited_N-{min_N}-{max_N}_T-{T}.pickle"
@@ -135,13 +135,19 @@ if __name__ == "__main__":
         tt, vt, et = sim_dicke(
             N=N,
             T=T,
-            spin_state=spin_state,
+            spin_state_name=spin_state_name,
             progress_bar={"yes": True, "no": False}.get(
                 show_progress_bars, False
             ),
         )
         data.append(
-            {"N": N, "spin_state": spin_state, "tt": tt, "vt": vt, "et": et}
+            {
+                "N": N,
+                "spin_state": spin_state_name,
+                "tt": tt,
+                "vt": vt,
+                "et": et,
+            }
         )
 
     with open(path, "wb") as file:
