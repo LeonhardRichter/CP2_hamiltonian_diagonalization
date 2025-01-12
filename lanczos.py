@@ -42,9 +42,9 @@ def csr_random_self_adjoint(n: int, d: float = 0.01) -> csr:
         random_state=np.random.default_rng(),
     )
     A = csr(1 / 2 * (adjoint(A) + A))
-    assert is_self_adjoint(
-        A
-    ), "something went wrong: result is not self adjoint"
+    assert is_self_adjoint(A), (
+        "something went wrong: result is not self adjoint"
+    )
     return A
 
 
@@ -226,10 +226,11 @@ def lanczos_evo(
             update(v_new, t, vt, tt)
             pbar.update(1)
         t_rest = T - t
-        v_final = step(t_rest, vt[-1])
-        t += t_rest
-        update(v_final, t, vt, tt)
-        pbar.update(1)
+        if t_rest != 0:
+            v_final = step(t_rest, vt[-1])
+            t += t_rest
+            update(v_final, t, vt, tt)
+            pbar.update(1)
     if return_final:
         return tt, vt, exp
     if not return_final:
