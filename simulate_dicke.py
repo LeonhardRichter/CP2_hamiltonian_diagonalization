@@ -29,7 +29,7 @@ lanczos_iterations_default = 15
 
 
 def time_step_default(T) -> float:
-    0.0005
+    return 0.0005
     # return T / 1000
 
 
