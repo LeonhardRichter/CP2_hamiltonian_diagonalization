@@ -1,13 +1,14 @@
 import pickle
+import timeit
 from ast import literal_eval
 from datetime import datetime
 from fractions import Fraction
+from typing import Union
 
 import numpy as np
 from numpy.typing import ArrayLike
 from scipy import sparse
 from tqdm import tqdm
-import timeit
 
 from dicke import (
     dicke_dim,
@@ -17,19 +18,29 @@ from dicke import (
     dicke_superradiant,
     num,
 )
-from lanczos import lanczos_evo
+from lanczos import adjoint, lanczos_evo
 
 
 def n_max_default(N) -> int:
     return 2 * N
 
 
-lanczos_iterations_default = 10
+lanczos_iterations_default = 15
 
 
 def time_step_default(T) -> float:
-    0.001
+    0.0005
     # return T / 1000
+
+
+def expect(
+    A: Union[ArrayLike, sparse.csr_array], v: ArrayLike
+) -> np.complex128:
+    return np.complex128(adjoint(v) @ A @ v)
+
+
+def var(A: Union[ArrayLike, sparse.csr_array], v: ArrayLike) -> np.complex128:
+    return np.complex128(expect(A**2, v) - expect(A, v) ** 2)
 
 
 def sim_dicke(
@@ -73,11 +84,18 @@ def sim_dicke(
     state = np.kron(spin_state, photon_state)
 
     id_o_num = sparse.kron(sparse.eye_array(dicke_dim(N)), num(n_max))
+
+    def id_o_num_exp(v):
+        return expect(id_o_num, v)
+
+    def id_o_num_var(v):
+        return var(id_o_num, v)
+
     start = timeit.default_timer()
     tt, vt, et = lanczos_evo(
         H,
         state,
-        observables=(id_o_num,),
+        observables=(id_o_num_exp, id_o_num_var),
         dim=lanczos_iterations + 1,
         T=T,
         dt=time_step,
