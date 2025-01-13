@@ -6,7 +6,7 @@ from numpy.typing import ArrayLike
 from scipy import linalg, sparse
 from scipy.sparse import csr_array as csr
 
-from typing import Union
+from typing import Union, Callable
 
 from tqdm import tqdm
 
@@ -42,9 +42,9 @@ def csr_random_self_adjoint(n: int, d: float = 0.01) -> csr:
         random_state=np.random.default_rng(),
     )
     A = csr(1 / 2 * (adjoint(A) + A))
-    assert is_self_adjoint(A), (
-        "something went wrong: result is not self adjoint"
-    )
+    assert is_self_adjoint(
+        A
+    ), "something went wrong: result is not self adjoint"
     return A
 
 
@@ -143,17 +143,15 @@ def lanczos(
 #     return A
 
 
-def expect(A: Union[ArrayLike, csr], v: ArrayLike) -> np.complex128:
-    return np.complex128(adjoint(v) @ A @ v)
-
-
 def lanczos_evo(
     H,
     v,
     dim: int,
     T: float,
     dt: float = 0.01,
-    observables: tuple = tuple(),
+    observables: tuple[
+        Callable[[Union[ArrayLike, csr], Union[ArrayLike, csr]], np.complex128]
+    ] = tuple(),
     lanczos_epsilon: float = 0.001,
     save_states: bool = False,
     return_final: bool = True,
@@ -189,7 +187,7 @@ def lanczos_evo(
     for A in observables:
         exp.append(
             [
-                expect(A, v),
+                A(v),
             ]
         )
     if observables == list():
@@ -200,7 +198,7 @@ def lanczos_evo(
     def update(v_new, t, vt, tt):
         tt.append(t)
         for i, A in enumerate(observables):
-            exp[i].append(expect(A, v_new))
+            exp[i].append(A(v_new))
         if save_states:
             vt.append(v_new)
         if not save_states:
