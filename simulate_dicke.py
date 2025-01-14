@@ -114,7 +114,7 @@ if __name__ == "__main__":
     )
     if skip_selection.lower() == "no":
         min_N = int(input("min_N [2]: ").strip() or "2")
-        max_N = int(input("max_N [20]: ").strip() or "20")
+        max_N = int(input("max_N [20]: ").strip() or "60")
         step_N = int(input("step_N [1]: ").strip() or "1")
 
         spin_state_name = (
@@ -127,7 +127,7 @@ if __name__ == "__main__":
                 type(spin_state_name) is tuple and len(spin_state_name) == 2
             ), "unsuported input type"
 
-        T = float(input("T [6.0]: ").strip() or "6.0")
+        T = float(input("T [3.0]: ").strip() or "3.0")
 
         now = datetime.now()
         path = (
@@ -141,10 +141,10 @@ if __name__ == "__main__":
         )
     else:
         min_N = 2
-        max_N = 20
+        max_N = 60
         step_N = 1
         spin_state_name = "excited"
-        T = 6.0
+        T = 3.0
         now = datetime.now()
         path = f"dicke_sim_{now.strftime("%d_%m_%Y-%H_%M_%S")}_excited_N-{min_N}-{max_N}_T-{T}.pickle"
         show_progress_bars = "no"
