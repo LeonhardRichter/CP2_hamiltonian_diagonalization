@@ -76,7 +76,14 @@ with open(
 ) as file:
     data_superradient = pickle.load(file)
 
+with open(
+    "dicke_sim_16_01_2025-14_31_04_superradiant_N-61-120_T-0.1.pickle", "rb"
+) as file:
+    data_superradient_short = pickle.load(file)
+
 data_excited_combined = data_excited_short + data_excited
+
+data_superradient_combined = data_superradient_short + data_superradient_long
 
 
 # %%
@@ -545,12 +552,12 @@ fig_avg_after_first_bump = plot_data_N_dependence(
     [data_superradient, data_excited],
     "avg after first bump",
     # max_N=43,
-    fit_function=linear,
-    fit_function_std=linear,
-    initial_fit_parameters=(1,),
+    fit_function=quadratic_linear,
+    fit_function_std=quadratic_linear_std,
+    initial_fit_parameters=(1, 0),
 )
 
-fig_avg_after_first_bump.set_figheight(1 / 2 * latex_textwidth)
+fig_avg_after_first_bump.set_figheight(0.33 * latex_textwidth)
 
 fig_avg_after_first_bump.savefig(
     "figures/fig_avg_after_first_bump.pdf", bbox_inches="tight", format="pdf"
@@ -580,11 +587,11 @@ fig_high_of_first_bump = plot_data_N_dependence(
     [data_excited, data_superradient],
     "first high",
     # max_N=43,
-    fit_function=linear,
-    fit_function_std=linear_std,
-    initial_fit_parameters=(1,),
+    fit_function=quadratic_linear,
+    fit_function_std=quadratic_linear_std,
+    initial_fit_parameters=(1, 0),
 )
-fig_high_of_first_bump.set_figheight(1 / 2 * latex_textwidth)
+fig_high_of_first_bump.set_figheight(0.33 * latex_textwidth)
 
 fig_high_of_first_bump.savefig(
     "figures/fig_high_of_first_bump.pdf", bbox_inches="tight", format="pdf"
@@ -618,7 +625,7 @@ fig_slope_of_first_bump = plot_data_N_dependence(
     fit_function_std=quadratic_linear_std,
     initial_fit_parameters=(1, 0),
 )
-fig_slope_of_first_bump.set_figheight(1 / 2 * latex_textwidth)
+fig_slope_of_first_bump.set_figheight(0.33 * latex_textwidth)
 
 fig_slope_of_first_bump.savefig(
     "figures/fig_slope_of_first_bump.pdf", bbox_inches="tight", format="pdf"
@@ -630,7 +637,12 @@ fig_slope_of_first_bump.savefig(
 
 # %%
 # compute total slope for short time
-for data in [data_excited_combined, data_superradient]:
+for data in [
+    data_excited_combined,
+    data_superradient_combined,
+    data_superradient,
+    data_excited,
+]:
     for res in data:
         res["initial slope"] = list()
         for et in res["et"]:
@@ -649,14 +661,14 @@ for data in [data_excited_combined, data_superradient]:
 
 # %%
 fig_slope_short_time = plot_data_N_dependence(
-    [data_superradient, data_excited_combined],
+    [data_superradient, data_excited],
     "initial slope",
     # max_N=43,
     fit_function=quadratic_linear,
     fit_function_std=quadratic_linear_std,
     initial_fit_parameters=(1, 0),
 )
-fig_slope_short_time.set_figheight(1 / 2 * latex_textwidth)
+fig_slope_short_time.set_figheight(0.33 * latex_textwidth)
 fig_slope_short_time.savefig(
     "figures/fig_slope_short_time.pdf", bbox_inches="tight", format="pdf"
 )
