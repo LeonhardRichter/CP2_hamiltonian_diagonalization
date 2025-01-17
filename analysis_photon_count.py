@@ -8,10 +8,17 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 from simulate_dicke import sim_dicke
+import uncertainties
 
 
 # %%
+# from
+#   \usepackage{layout}
+#   layout
+# in latex document
+# 0.01384 is the conversion from pt to inches
 latex_textwidth = 0.01384 * 434
+latex_textheight = 0.01384 * 623
 
 
 # %%
@@ -443,10 +450,10 @@ def quadratic_std(x, a_std):
 # %%
 marker_dict = {"superradiant": "o", "excited": "^"}
 label_dict = {
-    "avg after first bump": "Average after initial phase",
-    "first high": "Maximum in initial phase",
-    "first slope": "Slope of initial phase",
-    "initial slope": "initial gradient",
+    "avg after first bump": "Avg. after init. phase",
+    "first high": "Max. in init. phase",
+    "first slope": "Grad. of init. phase",
+    "initial slope": "Initial gradient",
 }
 color_dict = {"superradiant": "limegreen", "excited": "dodgerblue"}  # orangered
 
@@ -459,12 +466,13 @@ def plot_data_N_dependence(
     fit_function: Callable | None = None,
     fit_function_std: Callable | None = None,
     initial_fit_parameters: tuple | None = None,
+    width=latex_textwidth,
+    legend: bool = False,
 ):
     fig, ax = plt.subplots()
-    fig.set_layout_engine("constrained")
+    fig.set_layout_engine("tight")
     w, h = fig.get_size_inches()
     aspectratio = h / w
-    width = 8
     fig.set_size_inches(width, width * aspectratio, forward=False)
 
     for data in data_list:
@@ -506,16 +514,16 @@ def plot_data_N_dependence(
                 # color=color_dict[state_name],
                 color="black",
                 # label="{}*(x-{})^2 + {}*x + {}".format(*np.round(popt, 2)),
-                label=f"{fit_function.__name__} fit",
+                # label=f"{fit_function.__name__} fit",
                 # zorder=-1,
             )
-            print(metric)
-            print(
-                f"Fit Result for {state_name} state with {fit_function.__name__} fit:"
-            )
+            print(metric, ", ", state_name)
+            print(f"{fit_function.__name__} fit:")
             alphabet = "abcdefghijklmnopqrstuvwxyz"
             for a, p, err in zip(alphabet, popt, pstd):
-                print(f"{a} = {p} \\pm {err}")
+                print(
+                    f"{a} = \\num\u007b{uncertainties.ufloat(p, err):0.2ue}\u007d"
+                )
 
             if fit_function_std is not None:
                 y_fit_std = fit_function_std(x_fit, *pstd)
@@ -540,14 +548,18 @@ def plot_data_N_dependence(
             label=f"{state_name} state",
             zorder=1,
         )
-
-    ax.legend()
+    if legend:
+        ax.legend()
     ax.set_xlabel("N")
     ax.set_ylabel(label_dict[metric])
     return fig
 
 
 # %%
+
+fig_width = 0.8 * latex_textwidth
+fig_height = 0.25 * latex_textheight
+
 fig_avg_after_first_bump = plot_data_N_dependence(
     [data_superradient, data_excited],
     "avg after first bump",
@@ -555,9 +567,10 @@ fig_avg_after_first_bump = plot_data_N_dependence(
     fit_function=quadratic_linear,
     fit_function_std=quadratic_linear_std,
     initial_fit_parameters=(1, 0),
+    width=fig_width,
 )
 
-fig_avg_after_first_bump.set_figheight(0.33 * latex_textwidth)
+fig_avg_after_first_bump.set_figheight(fig_height)
 
 fig_avg_after_first_bump.savefig(
     "figures/fig_avg_after_first_bump.pdf", bbox_inches="tight", format="pdf"
@@ -590,8 +603,10 @@ fig_high_of_first_bump = plot_data_N_dependence(
     fit_function=quadratic_linear,
     fit_function_std=quadratic_linear_std,
     initial_fit_parameters=(1, 0),
+    width=fig_width,
+    legend=True,
 )
-fig_high_of_first_bump.set_figheight(0.33 * latex_textwidth)
+fig_high_of_first_bump.set_figheight(fig_height)
 
 fig_high_of_first_bump.savefig(
     "figures/fig_high_of_first_bump.pdf", bbox_inches="tight", format="pdf"
@@ -624,8 +639,9 @@ fig_slope_of_first_bump = plot_data_N_dependence(
     fit_function=quadratic_linear,
     fit_function_std=quadratic_linear_std,
     initial_fit_parameters=(1, 0),
+    width=fig_width,
 )
-fig_slope_of_first_bump.set_figheight(0.33 * latex_textwidth)
+fig_slope_of_first_bump.set_figheight(fig_height)
 
 fig_slope_of_first_bump.savefig(
     "figures/fig_slope_of_first_bump.pdf", bbox_inches="tight", format="pdf"
@@ -667,8 +683,9 @@ fig_slope_short_time = plot_data_N_dependence(
     fit_function=quadratic_linear,
     fit_function_std=quadratic_linear_std,
     initial_fit_parameters=(1, 0),
+    width=fig_width,
 )
-fig_slope_short_time.set_figheight(0.33 * latex_textwidth)
+fig_slope_short_time.set_figheight(fig_height)
 fig_slope_short_time.savefig(
     "figures/fig_slope_short_time.pdf", bbox_inches="tight", format="pdf"
 )
@@ -701,8 +718,8 @@ slopes_demos = plot_data(
     width=latex_textwidth,
 )
 
-slopes_demos.set_figheight(0.33 * latex_textwidth)
-fig_demo.set_figheight(0.33 * latex_textwidth)
+slopes_demos.set_figheight(0.3 * latex_textwidth)
+fig_demo.set_figheight(0.3 * latex_textwidth)
 
 for i, N in enumerate(demonstration_selection):
     res_demo = data[-(N - 1)]
