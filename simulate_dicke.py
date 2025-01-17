@@ -132,9 +132,9 @@ if __name__ == "__main__":
         now = datetime.now()
         path = (
             input(
-                "path/to/data.pickle [./dicke_sim_d_m_Y-H_M_S_spin-state_N-min_N-max_N_T-T.pickle]:"
+                "path/to/data.pickle [./data/dicke_sim_d_m_Y-H_M_S_spin-state_N-min_N-max_N_T-T.pickle]:"
             ).strip()
-            or f"dicke_sim_{now.strftime("%d_%m_%Y-%H_%M_%S")}_{spin_state_name}_N-{min_N}-{max_N}_T-{T}.pickle"
+            or f"data/dicke_sim_{now.strftime("%d_%m_%Y-%H_%M_%S")}_{spin_state_name}_N-{min_N}-{max_N}_T-{T}.pickle"
         )
         show_progress_bars = (
             input("show progress bars [yes/NO]: ").strip() or "no"
@@ -146,7 +146,7 @@ if __name__ == "__main__":
         spin_state_name = "excited"
         T = 3.0
         now = datetime.now()
-        path = f"dicke_sim_{now.strftime("%d_%m_%Y-%H_%M_%S")}_excited_N-{min_N}-{max_N}_T-{T}.pickle"
+        path = f"data/dicke_sim_{now.strftime("%d_%m_%Y-%H_%M_%S")}_excited_N-{min_N}-{max_N}_T-{T}.pickle"
         show_progress_bars = "no"
 
     print(f"""Running simulation with following parameters:
