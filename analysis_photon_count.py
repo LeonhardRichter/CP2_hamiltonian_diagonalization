@@ -55,7 +55,7 @@ def plot_sim_dicke(
 #     data = pickle.load(file)
 
 with open(
-    "dicke_sim_09_01_2025-17_04_45_excited_N-2-60_T-6.0.pickle", "rb"
+    "data/dicke_sim_09_01_2025-17_04_45_excited_N-2-60_T-6.0.pickle", "rb"
 ) as file:
     data_excited_long = pickle.load(file)
 
@@ -64,27 +64,28 @@ for res in data_excited_long:
     res["spin_state"] = "excited"
 
 with open(
-    "dicke_sim_15_01_2025-10_33_01_excited_N-61-120_T-0.1.pickle", "rb"
+    "data/dicke_sim_15_01_2025-10_33_01_excited_N-61-120_T-0.1.pickle", "rb"
 ) as file:
     data_excited_short = pickle.load(file)
 
 with open(
-    "dicke_sim_13_01_2025-12_59_32_excited_N-2-60_T-3.0.pickle", "rb"
+    "data/dicke_sim_13_01_2025-12_59_32_excited_N-2-60_T-3.0.pickle", "rb"
 ) as file:
     data_excited = pickle.load(file)
 
 with open(
-    "dicke_sim_10_01_2025-14_46_06_superradiant_N-2-60_T-6.0.pickle", "rb"
+    "data/dicke_sim_10_01_2025-14_46_06_superradiant_N-2-60_T-6.0.pickle", "rb"
 ) as file:
     data_superradient_long = pickle.load(file)
 
 with open(
-    "dicke_sim_14_01_2025-11_24_23_superradiant_N-2-60_T-3.0.pickle", "rb"
+    "data/dicke_sim_14_01_2025-11_24_23_superradiant_N-2-60_T-3.0.pickle", "rb"
 ) as file:
     data_superradient = pickle.load(file)
 
 with open(
-    "dicke_sim_16_01_2025-14_31_04_superradiant_N-61-120_T-0.1.pickle", "rb"
+    "data/dicke_sim_16_01_2025-14_31_04_superradiant_N-61-120_T-0.1.pickle",
+    "rb",
 ) as file:
     data_superradient_short = pickle.load(file)
 
@@ -558,7 +559,7 @@ def plot_data_N_dependence(
 # %%
 
 fig_width = 0.8 * latex_textwidth
-fig_height = 0.25 * latex_textheight
+fig_height = 0.3 * latex_textheight
 
 fig_avg_after_first_bump = plot_data_N_dependence(
     [data_superradient, data_excited],
@@ -691,6 +692,28 @@ fig_slope_short_time.savefig(
 )
 fig_slope_short_time.savefig(
     "figures/fig_slope_short_time.svg", bbox_inches="tight", format="svg"
+)
+
+
+fig_slope_short_time = plot_data_N_dependence(
+    [data_superradient_combined, data_excited_combined],
+    "initial slope",
+    # max_N=43,
+    fit_function=quadratic_linear,
+    fit_function_std=quadratic_linear_std,
+    initial_fit_parameters=(1, 0),
+    width=fig_width,
+)
+fig_slope_short_time.set_figheight(fig_height)
+fig_slope_short_time.savefig(
+    "figures/fig_slope_short_time_combined.pdf",
+    bbox_inches="tight",
+    format="pdf",
+)
+fig_slope_short_time.savefig(
+    "figures/fig_slope_short_time_combined.svg",
+    bbox_inches="tight",
+    format="svg",
 )
 
 # %%
