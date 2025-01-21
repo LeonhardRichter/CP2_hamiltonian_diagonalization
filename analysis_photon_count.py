@@ -143,6 +143,7 @@ def plot_data(
     metric: str = "expect",
     set_colorbar: bool = True,
     use_larger_font: bool = False,
+    line_thickness: float = 2,
     width=latex_textwidth,
 ):
     if use_larger_font:
@@ -210,16 +211,20 @@ def plot_data(
     if metric == "slopes":
         ax.axhline(y=0, xmin=0, xmax=1, color="black")
 
-    for N, x, y, c, f in zip(Ns, xs, ys, colors, selection_filter):
+    for N, x, y, c, f in zip(
+        Ns[::-1], xs[::-1], ys[::-1], colors[::-1], selection_filter[::-1]
+    ):
         if f:
             ax.plot(
-                x[:: int(len(x) / 1000)],
-                y[:: int(len(x) / 1000)],
-                "o-",
-                alpha=0.6,
-                # linewidth=1.5,
-                # markeredgewidth=1,
-                markersize=1,
+                # x[:: int(len(x) / 500)],
+                # y[:: int(len(x) / 500)],
+                x,
+                y,
+                ".-",
+                alpha=1,
+                linewidth=line_thickness * 0.75,
+                # markeredgewidth=line_thickness*.5,
+                markersize=line_thickness,
                 label=f"N={N}",
                 color=c,
             )
@@ -291,6 +296,7 @@ fig_excited = plot_data(
     # x=(0, 6),
     y=(0, 70),
     width=latex_textwidth * 0.5,
+    line_thickness=1,
     # use_larger_font=True,
 )
 
@@ -300,6 +306,7 @@ fig_superradiant = plot_data(
     # x=(0, 6),
     y=(0, 70),
     width=latex_textwidth * 0.5,
+    line_thickness=1,
     # use_larger_font=True,
 )
 
@@ -309,12 +316,18 @@ fig_excited.savefig(
 fig_excited.savefig(
     "figures/fig_excited.svg", bbox_inches="tight", format="svg"
 )
+fig_excited.savefig(
+    "figures/fig_excited.png", bbox_inches="tight", format="png", dpi=800
+)
 
 fig_superradiant.savefig(
     "figures/fig_superradiant.pdf", bbox_inches="tight", format="pdf"
 )
 fig_superradiant.savefig(
     "figures/fig_superradiant.svg", bbox_inches="tight", format="svg"
+)
+fig_superradiant.savefig(
+    "figures/fig_superradiant.png", bbox_inches="tight", format="png", dpi=800
 )
 
 # fig_excited.show()
@@ -323,6 +336,45 @@ fig_superradiant.savefig(
 # plt.close()
 # fig2 = plot_data(data_excited, max_N=43, x=(0, 3))
 # fig3 = plot_data(data_excited, max_N=43, x=(0, 2))
+
+# %%
+selection = [60, 50, 40, 30, 20, 10, 2]
+fig_excited_selection = plot_data(
+    data_excited,
+    # max_N=43,
+    # x=(0, 6),
+    y=(0, 70),
+    width=latex_textwidth * 0.5,
+    N_selection=selection,
+    max_N_color=60,
+    # use_larger_font=True,
+)
+
+fig_superradiant_selection = plot_data(
+    data_superradient,
+    # max_N=43,
+    # x=(0, 6),
+    y=(0, 70),
+    width=latex_textwidth * 0.5,
+    N_selection=selection,
+    max_N_color=60,
+    # use_larger_font=True,
+)
+
+fig_excited_selection.savefig(
+    "figures/fig_excited_selection.pdf", bbox_inches="tight", format="pdf"
+)
+fig_excited_selection.savefig(
+    "figures/fig_excited_selection.svg", bbox_inches="tight", format="svg"
+)
+
+fig_superradiant_selection.savefig(
+    "figures/fig_superradiant_selection.pdf", bbox_inches="tight", format="pdf"
+)
+fig_superradiant_selection.savefig(
+    "figures/fig_superradiant_selection.svg", bbox_inches="tight", format="svg"
+)
+
 
 # %%
 selection = [43, 20, 7]
