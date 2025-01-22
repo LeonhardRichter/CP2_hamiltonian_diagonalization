@@ -221,12 +221,13 @@ def plot_data(
                 x,
                 y,
                 ".-",
-                alpha=1,
+                alpha=0.75,
                 linewidth=line_thickness * 0.75,
                 # markeredgewidth=line_thickness*.5,
                 markersize=line_thickness,
                 label=f"N={N}",
                 color=c,
+                rasterized=True,
             )
     ax.set_xlabel("t")
     # ax.set_ylabel("$\\langle v(t), \\hat n v(t)\\rangle$")
@@ -273,7 +274,6 @@ def plot_data(
             cbar_ticks = N_selection
 
         cbar.set_ticks(np.array(cbar_ticks))
-
     return fig
 
 
@@ -311,23 +311,31 @@ fig_superradiant = plot_data(
 )
 
 fig_excited.savefig(
-    "figures/fig_excited.pdf", bbox_inches="tight", format="pdf"
+    "figures/fig_excited.pdf", bbox_inches="tight", dpi=500, transparent=True
 )
+
 fig_excited.savefig(
-    "figures/fig_excited.svg", bbox_inches="tight", format="svg"
-)
-fig_excited.savefig(
-    "figures/fig_excited.png", bbox_inches="tight", format="png", dpi=800
+    "figures/fig_excited.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
 )
 
 fig_superradiant.savefig(
-    "figures/fig_superradiant.pdf", bbox_inches="tight", format="pdf"
+    "figures/fig_superradiant.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
 )
+
 fig_superradiant.savefig(
-    "figures/fig_superradiant.svg", bbox_inches="tight", format="svg"
-)
-fig_superradiant.savefig(
-    "figures/fig_superradiant.png", bbox_inches="tight", format="png", dpi=800
+    "figures/fig_superradiant.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
 )
 
 # fig_excited.show()
@@ -362,17 +370,33 @@ fig_superradiant_selection = plot_data(
 )
 
 fig_excited_selection.savefig(
-    "figures/fig_excited_selection.pdf", bbox_inches="tight", format="pdf"
+    "figures/fig_excited_selection.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
 )
 fig_excited_selection.savefig(
-    "figures/fig_excited_selection.svg", bbox_inches="tight", format="svg"
+    "figures/fig_excited_selection.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
 )
 
 fig_superradiant_selection.savefig(
-    "figures/fig_superradiant_selection.pdf", bbox_inches="tight", format="pdf"
+    "figures/fig_superradiant_selection.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
 )
 fig_superradiant_selection.savefig(
-    "figures/fig_superradiant_selection.svg", bbox_inches="tight", format="svg"
+    "figures/fig_superradiant_selection.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
 )
 
 
@@ -401,17 +425,33 @@ fig_superradiant_long = plot_data(
 )
 
 fig_excited_long.savefig(
-    "figures/fig_excited_long.pdf", bbox_inches="tight", format="pdf"
+    "figures/fig_excited_long.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
 )
 fig_excited_long.savefig(
-    "figures/fig_excited_long.svg", bbox_inches="tight", format="svg"
+    "figures/fig_excited_long.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
 )
 
 fig_superradiant_long.savefig(
-    "figures/fig_superradiant_long.pdf", bbox_inches="tight", format="pdf"
+    "figures/fig_superradiant_long.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
 )
 fig_superradiant_long.savefig(
-    "figures/fig_superradiant_long.svg", bbox_inches="tight", format="svg"
+    "figures/fig_superradiant_long.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
 )
 
 # fig_excited_long.show()
@@ -445,29 +485,6 @@ fig_superradiant = plot_data(
 # %% [markdown]
 # Above N=43 there are numerical artifacts. Possibly need to increase time_step
 #
-
-# %%
-# compute slopes and add to data
-for data in [data_excited, data_superradient]:
-    for res in data:
-        res["st_sign_change"] = list()
-        for st in res["st"]:
-            sign_slope = np.sign(res["st"][0])
-            sign_change = np.sign(sign_slope[:-1] - sign_slope[1:])
-            res["st_sign_change"].append(sign_change)
-
-# %%
-# compute average after first slope
-for data in [data_excited, data_superradient]:
-    for res in data:
-        res["avg after first bump"] = list()
-        for et, st, st_sign_change in zip(
-            res["et"], res["st"], res["st_sign_change"]
-        ):
-            # get first non zero
-            first_sign_change = (st_sign_change != 0).argmax(axis=0)
-            after_first_bump = et[first_sign_change + 1 :]
-            res["avg after first bump"].append(np.average(after_first_bump))
 
 
 # %%
@@ -507,6 +524,10 @@ label_dict = {
     "first high": "Max. in init. phase",
     "first slope": "Grad. of init. phase",
     "initial slope": "Initial gradient",
+    "avg after first bump over N": "Avg. after init. phase/N",
+    "first high over N": "Max. in init. phase/N",
+    "first slope over N": "Grad. of init. phase/N",
+    "initial slope over N": "Initial gradient/N",
 }
 color_dict = {"superradiant": "limegreen", "excited": "dodgerblue"}  # orangered
 
@@ -514,6 +535,7 @@ color_dict = {"superradiant": "limegreen", "excited": "dodgerblue"}  # orangered
 def plot_data_N_dependence(
     data_list,
     metric: str,
+    inset_metric: str | None = None,
     max_N: int = None,
     min_N: int = None,
     fit_function: Callable | None = None,
@@ -542,6 +564,36 @@ def plot_data_N_dependence(
         y = np.array([np.real_if_close(res[metric][0]) for res in data])[::-1]
         x = np.array([res["N"] for res in data])[::-1]
         state_name = data[0]["spin_state"]
+
+        if inset_metric is not None:
+            axinset = ax.inset_axes(
+                [0.15, 0.5, 0.5, 0.4],
+                xlim=(min_N, max_N),
+                ylim=(0, 3),
+            )
+            yinset = np.array(
+                [np.real_if_close(res[inset_metric][0]) for res in data]
+            )[::-1]
+            axinset.scatter(
+                x[filter],
+                yinset[filter],
+                # c=x[filter],
+                # cmap=mpl.cm.viridis,
+                color=color_dict[state_name],
+                alpha=0.7,
+                marker=marker_dict.get(state_name, "."),
+                # marker="$f=ma$",
+                s=10,
+                # s=2000,
+                # label=f"{state_name} state",
+                zorder=1,
+            )
+            axinset.set_xlim(-0.3, max_N)
+            axinset.set_ylim(0, np.max(yinset) + 0.3)
+            axinset.set_yticks(np.linspace(0, np.max(yinset), 4))
+            axinset.set_xlabel("N")
+            axinset.set_ylabel("over N")
+
         if fit_function is not None:
             x_data = x[filter]
             y_data = y[filter]
@@ -609,6 +661,38 @@ def plot_data_N_dependence(
 
 
 # %%
+# compute slopes and add to data
+for data in [data_excited, data_superradient]:
+    for res in data:
+        res["st_sign_change"] = list()
+        for st in res["st"]:
+            sign_slope = np.sign(res["st"][0])
+            sign_change = np.sign(sign_slope[:-1] - sign_slope[1:])
+            res["st_sign_change"].append(sign_change)
+
+# %%
+# compute average after first slope
+for data in [data_excited, data_superradient]:
+    for res in data:
+        res["avg after first bump"] = list()
+        for et, st, st_sign_change in zip(
+            res["et"], res["st"], res["st_sign_change"]
+        ):
+            # get first non zero
+            first_sign_change = (st_sign_change != 0).argmax(axis=0)
+            after_first_bump = et[first_sign_change + 1 :]
+            res["avg after first bump"].append(np.average(after_first_bump))
+
+
+for data in [data_excited, data_superradient]:
+    for res in data:
+        res["avg after first bump over N"] = list()
+        for avg in res["avg after first bump"]:
+            # get first non zero
+            N = res["N"]
+            res["avg after first bump over N"].append(avg / N)
+
+# %%
 
 fig_width = 0.8 * latex_textwidth
 fig_height = 0.3 * latex_textheight
@@ -626,11 +710,50 @@ fig_avg_after_first_bump = plot_data_N_dependence(
 fig_avg_after_first_bump.set_figheight(fig_height)
 
 fig_avg_after_first_bump.savefig(
-    "figures/fig_avg_after_first_bump.pdf", bbox_inches="tight", format="pdf"
+    "figures/fig_avg_after_first_bump.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
 )
 fig_avg_after_first_bump.savefig(
-    "figures/fig_avg_after_first_bump.svg", bbox_inches="tight", format="svg"
+    "figures/fig_avg_after_first_bump.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
 )
+plt.close()
+
+fig_avg_after_first_bump_over_N = plot_data_N_dependence(
+    [data_superradient, data_excited],
+    "avg after first bump over N",
+    # max_N=43,
+    # fit_function=quadratic_linear,
+    # fit_function_std=quadratic_linear_std,
+    # initial_fit_parameters=(1, 0),
+    width=fig_width,
+)
+
+fig_avg_after_first_bump_over_N.set_figheight(fig_height)
+
+fig_avg_after_first_bump_over_N.savefig(
+    "figures/fig_avg_after_first_bump_over_N.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
+)
+fig_avg_after_first_bump_over_N.savefig(
+    "figures/fig_avg_after_first_bump_over_N.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
+)
+plt.close()
+
+# %%
 
 
 # %%
@@ -648,6 +771,14 @@ for data in [data_excited, data_superradient]:
 
             res["first high"].append(max_in_first_bump)
 
+for data in [data_excited, data_superradient]:
+    for res in data:
+        res["first high over N"] = list()
+        for a in res["first high"]:
+            # get first non zero
+            N = res["N"]
+            res["first high over N"].append(a / N)
+
 # %%
 fig_high_of_first_bump = plot_data_N_dependence(
     [data_excited, data_superradient],
@@ -662,12 +793,49 @@ fig_high_of_first_bump = plot_data_N_dependence(
 fig_high_of_first_bump.set_figheight(fig_height)
 
 fig_high_of_first_bump.savefig(
-    "figures/fig_high_of_first_bump.pdf", bbox_inches="tight", format="pdf"
+    "figures/fig_high_of_first_bump.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
 )
 fig_high_of_first_bump.savefig(
-    "figures/fig_high_of_first_bump.svg", bbox_inches="tight", format="svg"
+    "figures/fig_high_of_first_bump.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
 )
+plt.close()
 
+# %%
+fig_high_of_first_bump_over_N = plot_data_N_dependence(
+    [data_excited, data_superradient],
+    "first high over N",
+    # max_N=43,
+    # fit_function=quadratic_linear,
+    # fit_function_std=quadratic_linear_std,
+    # initial_fit_parameters=(1, 0),
+    width=fig_width,
+    legend=True,
+)
+fig_high_of_first_bump_over_N.set_figheight(fig_height)
+
+fig_high_of_first_bump_over_N.savefig(
+    "figures/fig_high_of_first_bump_over_N.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
+)
+fig_high_of_first_bump_over_N.savefig(
+    "figures/fig_high_of_first_bump_over_N.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
+)
+plt.close()
 
 # %%
 # compute total slope of first bump
@@ -697,11 +865,20 @@ fig_slope_of_first_bump = plot_data_N_dependence(
 fig_slope_of_first_bump.set_figheight(fig_height)
 
 fig_slope_of_first_bump.savefig(
-    "figures/fig_slope_of_first_bump.pdf", bbox_inches="tight", format="pdf"
+    "figures/fig_slope_of_first_bump.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
 )
 fig_slope_of_first_bump.savefig(
-    "figures/fig_slope_of_first_bump.svg", bbox_inches="tight", format="svg"
+    "figures/fig_slope_of_first_bump.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
 )
+plt.close()
 
 
 # %%
@@ -725,6 +902,14 @@ for data in [
                 max_in_selection / t_of_max_in_selection
             )
 
+for data in [data_excited, data_superradient]:
+    for res in data:
+        res["initial slope over N"] = list()
+        for a in res["initial slope"]:
+            # get first non zero
+            N = res["N"]
+            res["initial slope over N"].append(a / N)
+
 # %%
 [res["N"] for res in data_excited_combined]
 
@@ -740,13 +925,50 @@ fig_slope_short_time = plot_data_N_dependence(
 )
 fig_slope_short_time.set_figheight(fig_height)
 fig_slope_short_time.savefig(
-    "figures/fig_slope_short_time.pdf", bbox_inches="tight", format="pdf"
+    "figures/fig_slope_short_time.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
 )
 fig_slope_short_time.savefig(
-    "figures/fig_slope_short_time.svg", bbox_inches="tight", format="svg"
+    "figures/fig_slope_short_time.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
+)
+plt.close()
+
+# %%
+fig_slope_short_time_over_N = plot_data_N_dependence(
+    [data_superradient, data_excited],
+    "initial slope over N",
+    # max_N=43,
+    # fit_function=quadratic_linear,
+    # fit_function_std=quadratic_linear_std,
+    # initial_fit_parameters=(1, 0),
+    width=fig_width,
 )
 
+fig_slope_short_time_over_N.set_figheight(fig_height)
+fig_slope_short_time_over_N.savefig(
+    "figures/fig_slope_short_time_over_N.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
+)
+fig_slope_short_time_over_N.savefig(
+    "figures/fig_slope_short_time_over_N.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
+)
+plt.close()
 
+# %%
 fig_slope_short_time = plot_data_N_dependence(
     [data_superradient_combined, data_excited_combined],
     "initial slope",
@@ -761,12 +983,46 @@ fig_slope_short_time.savefig(
     "figures/fig_slope_short_time_combined.pdf",
     bbox_inches="tight",
     format="pdf",
+    dpi=500,
+    transparent=True,
 )
 fig_slope_short_time.savefig(
-    "figures/fig_slope_short_time_combined.svg",
+    "figures/fig_slope_short_time_combined.png",
     bbox_inches="tight",
-    format="svg",
+    format="png",
+    dpi=500,
+    transparent=True,
 )
+plt.close()
+
+# %%
+fig_slope_short_time_inset = plot_data_N_dependence(
+    [data_superradient, data_excited],
+    "initial slope",
+    inset_metric="initial slope over N",
+    # max_N=43,
+    fit_function=quadratic_linear,
+    fit_function_std=quadratic_linear_std,
+    initial_fit_parameters=(1, 0),
+    width=fig_width,
+)
+
+fig_slope_short_time_inset.set_figheight(fig_height)
+fig_slope_short_time_inset.savefig(
+    "figures/fig_slope_short_time_inset.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
+)
+fig_slope_short_time_inset.savefig(
+    "figures/fig_slope_short_time_inset.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
+)
+plt.close()
 
 # %%
 demonstration_selection = [
@@ -934,12 +1190,74 @@ for i, N in enumerate(demonstration_selection):
     ax_slopes.set_ylim(frame_ymin, frame_ymax)
     # ax_slopes.legend()
 
-fig_demo.savefig("figures/fig_demo.pdf", bbox_inches="tight", format="pdf")
-fig_demo.savefig("figures/fig_demo.svg", bbox_inches="tight", format="svg")
+fig_demo.savefig(
+    "figures/fig_demo.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
+)
+fig_demo.savefig(
+    "figures/fig_demo.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
+)
 
 slopes_demos.savefig(
-    "figures/fig_slopes_demo.pdf", bbox_inches="tight", format="pdf"
+    "figures/fig_slopes_demo.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
 )
 slopes_demos.savefig(
-    "figures/fig_slopes_demo.svg", bbox_inches="tight", format="svg"
+    "figures/fig_slopes_demo.png",
+    bbox_inches="tight",
+    format="png",
+    dpi=500,
+    transparent=True,
 )
+plt.close()
+
+
+fig_anomalies = plot_data(
+    data_excited_long,
+    # max_N=43,
+    x=(0, 3),
+    y=(0, 100),
+    width=latex_textwidth * 0.5,
+    N_selection=[50],
+    max_N_color=60,
+    # use_larger_font=True,
+)
+
+fig_anomalies.savefig(
+    "figures/fig_anomalies.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
+)
+
+fig_no_anomalies = plot_data(
+    data_excited,
+    # max_N=43,
+    x=(0, 3),
+    y=(0, 100),
+    width=latex_textwidth * 0.5,
+    N_selection=[50],
+    max_N_color=60,
+    # use_larger_font=True,
+)
+
+fig_no_anomalies.savefig(
+    "figures/fig_no_anomalies.pdf",
+    bbox_inches="tight",
+    format="pdf",
+    dpi=500,
+    transparent=True,
+)
+
+plt.close()
