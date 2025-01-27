@@ -557,7 +557,7 @@ fig_height = 0.3 * latex_textheight
 for data in [data_excited, data_superradient]:
     for res in data:
         res["avg after first bump"] = list()
-        for st_sign_change in res["st_sign_change"]:
+        for et, st_sign_change in zip(res["et"], res["st_sign_change"]):
             # get first non zero
             first_sign_change = (st_sign_change != 0).argmax(axis=0)
             after_first_bump = et[first_sign_change + 1 :]
