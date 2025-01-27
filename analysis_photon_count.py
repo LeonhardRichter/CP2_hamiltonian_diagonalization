@@ -549,7 +549,7 @@ for data in [data_excited, data_superradient]:
 #################################################################################
 # set figure size
 fig_width = 0.8 * latex_textwidth
-fig_height = 0.3 * latex_textheight
+fig_height = 0.25 * latex_textheight
 
 #################################################################################
 # average after initial phase (fig. 5b)
