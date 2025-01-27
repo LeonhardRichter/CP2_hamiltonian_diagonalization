@@ -5,6 +5,7 @@
 # Date: 05.01.2025
 
 
+import datetime
 import pickle
 import timeit
 
@@ -12,7 +13,6 @@ import numpy as np
 
 from dicke import dicke_excited, dicke_hamiltonian, fock
 from lanczos import lanczos_evo as evo
-import datetime
 
 N = 10
 coupling = 1

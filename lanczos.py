@@ -1,18 +1,17 @@
 # Author: Leonhard Richter, 2024/2025
-# Python script defining the lanczos method for tridiagonalizing a self-adjoing matrix in sparse csr format.
+# Python script defining functions for the lanczos algorithm for approximately tridiagonalizing a self-adjoint matrix in sparse csr format.
+# Also a function applying the algorithm to matrix evolution is implemented.
+
+from typing import Callable, Union
 
 import numpy as np
 from numpy.typing import ArrayLike
 from scipy import linalg, sparse
 from scipy.sparse import csr_array as csr
-
-from typing import Union, Callable
-
 from tqdm import tqdm
 
 norm = linalg.norm
 rng = np.random.default_rng()
-# we will use sparse.csr, sparse.random_array, np.random.default_rng
 
 
 def adjoint(A: Union[csr, ArrayLike]):
@@ -95,52 +94,6 @@ def lanczos(
     basis[-1] = w / b_new
     # return matrix (dense) in the Lanczos basis, and the matrix (dense) of Lanczos basis vectors as rows
     return np.diag(a) + np.diag(b, 1) + np.diag(b, -1), basis
-
-    # # build the matrix in this basis (again in csr)
-    # indices = np.arange(max_dim)
-    # diag_indices = (indices, indices)
-    # diag = csr((a, diag_indices), shape=(max_dim, max_dim))
-    # upper_diag_indices = (indices[0:-1], indices[0:-1] + 1)
-    # upper_diag = csr((b, upper_diag_indices), shape=(max_dim, max_dim))
-    # lower_diag_indices = (indices[0:-1] + 1, indices[0:-1])
-    # lower_diag = csr((b, lower_diag_indices), shape=(max_dim, max_dim))
-    # return diag + lower_diag + upper_diag
-
-
-# def tridiag_to_diag(A: Union[ArrayLike, csr], copy: bool = True):
-#     """
-#     [[WIP]] function to diagonalize a real, symmetric, tridiagonal matrix, resulting from the Lanczos algorithm.
-#     """
-#     # we diagonalize from top to bottom by row manipulations
-#     if copy:
-#         A = A.copy()
-
-#     n = A.shape[0] - 1
-#     for i in range(0, n):
-#         # goal: diagonalize the i-th row
-#         Ai1i1 = A[[i + 1], [i + 1]]
-#         if Ai1i1 != 0:
-#             c = A[[i], [i + 1]] / Ai1i1
-#             A[[i], [i]] = A[[i], [i]] - c * A[[i + 1], [i]]
-#             # the entry right to the diagonal is zero now:
-#             # A[[i], [i+1]] = A[[i],[i+1]] - c*A[[i+1],[i+1]] = 0
-#             A[[i], [i + 1]] = 0
-#         else:
-#             print(f"zero diagonal encountered in row {i+1}, aborting")
-#             print(A.toarray().round(2))
-#             break
-#         if i > 0:
-#             if A[[i - 1], [i - 1]] != 0:
-#                 A[[i, i - 1]] = 0
-#             else:
-#                 print(f"zero diagonal encountered in row {i-1}, aborting")
-#                 print(A.toarray().round(2))
-#                 break
-
-#     # diagonalize the last row by the diagonal row above
-#     if A[[n - 1], [n - 1]] != 0:
-#         A[[n], [n - 1]] = 0
-#     return A
 
 
 def lanczos_evo(

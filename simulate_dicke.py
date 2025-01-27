@@ -1,3 +1,6 @@
+# Author: Leonhard Richter
+# Script for simulating the dynamics of the Dicke Hamiltonian by using the Lanczos algorithm
+
 import pickle
 import timeit
 from ast import literal_eval
@@ -28,7 +31,7 @@ def n_max_default(N) -> int:
 lanczos_iterations_default = 15
 
 
-def time_step_default(T) -> float:
+def time_step_default(T) -> float:  # noqa: ARG001
     return 0.0005
     # return T / 1000
 
