@@ -75,16 +75,32 @@ def Sz(N: int) -> csr:
     return A
 
 
+# def op_per_site(N: int, i: int, qubit_op: csr) -> csr:
+#     id_2 = sparse.eye_array(2)
+#     if i != 0:
+#         op = id_2
+#     if i == 0:
+#         op = qubit_op
+#     for _ in range(i - 1):
+#         op = sparse.kron(op, id_2)
+#     op = sparse.kron(op, qubit_op)
+#     for _ in range(N - i - 1):
+#         op = sparse.kron(op, id_2)
+#     return op
+
+
 def op_per_site(N: int, i: int, qubit_op: csr) -> csr:
     id_2 = sparse.eye_array(2)
     if i != 0:
         op = id_2
     if i == 0:
         op = qubit_op
-    for _ in range(i - 2):
-        op = sparse.kron(op, id_2)
-    op = sparse.kron(op, qubit_op)
-    for _ in range(N - i):
+    site = 1
+    while site < N:
+        site += 1
+        if site == i:
+            op = sparse.kron(op, qubit_op)
+            continue
         op = sparse.kron(op, id_2)
     return op
 
