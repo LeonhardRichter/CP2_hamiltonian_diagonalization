@@ -1,15 +1,15 @@
 # %%
 import pickle
-from typing import Iterable, Callable
+from typing import Callable, Iterable
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+
+import uncertainties
 from scipy.optimize import curve_fit
 
 from simulate_dicke import sim_dicke
-import uncertainties
-
 
 # %%
 # from
@@ -164,7 +164,7 @@ def plot_data(
         xs = np.array([res["tt"] for res in data])[::-1]
 
     Ns = np.array([res["N"] for res in data])[::-1]
-
+    # print(ys[np.argmin(Ns)])
     state_name = data[0]["spin_state"]
     # if plot_slopes:
     #     # change to derivative approximation
@@ -357,6 +357,19 @@ fig_excited_selection = plot_data(
     max_N_color=60,
     # use_larger_font=True,
 )
+sub_selection = [2]
+fig_excited_sub_selection = plot_data(
+    data_excited,
+    # max_N=43,
+    # x=(0, 6),
+    # y=(0, 70),
+    width=latex_textwidth * 0.5,
+    N_selection=sub_selection,
+    max_N_color=60,
+    # use_larger_font=True,
+)
+fig_excited_sub_selection.savefig("figures/subselection.pdf", dpi=500)
+plot_sim_dicke(2, 3)
 
 fig_superradiant_selection = plot_data(
     data_superradient,
